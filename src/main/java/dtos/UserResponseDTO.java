@@ -1,6 +1,7 @@
 package dtos;
 
 public class UserResponseDTO {
+    private int userId;
     private String username;
     private String email;
     private String createdAt;
@@ -8,7 +9,8 @@ public class UserResponseDTO {
     public UserResponseDTO() {
     }
 
-    public UserResponseDTO(String username, String email, String createdAt) {
+    public UserResponseDTO(int userId, String username, String email, String createdAt) {
+        this.userId = userId;
         this.username = username;
         this.email = email;
         this.createdAt = createdAt;
@@ -36,5 +38,13 @@ public class UserResponseDTO {
 
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 }
