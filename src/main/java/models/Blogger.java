@@ -17,6 +17,7 @@ public class Blogger extends User {
     @Override
     public UserResponseDTO getUserDetails() {
         return new UserResponseDTO(
+                this.id,
                 this.username,
                 this.email,
                 this.createdAt.format(DateTimeFormatter.ISO_DATE)
