@@ -11,21 +11,38 @@ import java.util.List;
 
 public class PostDAO {
 
-    public void addPost(Post post, int authorId) throws SQLException {
-        String query = "INSERT INTO posts (title, body, author_id) VALUES (?, ?, ?)";
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+    public void addPost(Post post, List<Integer> tagIds) throws SQLException {
+        String postSql = "INSERT INTO posts (title, body, author_id) VALUES (?, ?, ?)";
+        String tagSql = "INSERT INTO post_tags (post_id, tag_id) VALUES (?, ?)";
 
-            stmt.setString(1, post.getTitle());
-            stmt.setString(2, post.getBody());
-            stmt.setInt(3, authorId);
-            stmt.executeUpdate();
+        try (Connection conn = Database.getConnection()) {
+            conn.setAutoCommit(false);
 
-            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    post.setId(generatedKeys.getInt(1));
+            int postId;
+            try (PreparedStatement ps = conn.prepareStatement(postSql, Statement.RETURN_GENERATED_KEYS)) {
+                ps.setString(1, post.getTitle());
+                ps.setString(2, post.getBody());
+                ps.setInt(3, post.getAuthorId());
+                ps.executeUpdate();
+
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (!rs.next()) throw new SQLException("no id returned");
+                    postId = rs.getInt(1);
                 }
             }
+
+            if (tagIds != null && !tagIds.isEmpty()) {
+                try (PreparedStatement ps = conn.prepareStatement(tagSql)) {
+                    for (int tagId : tagIds) {
+                        ps.setInt(1, postId);
+                        ps.setInt(2, tagId);
+                        ps.addBatch();
+                    }
+                    ps.executeBatch();
+                }
+            }
+            conn.commit();
+            post.setId(postId);
         }
     }
 
@@ -35,7 +52,7 @@ public class PostDAO {
         String query = """
                 SELECT p.id, p.title, p.body, p.updated_at, u.username AS author
                 FROM posts p
-                         JOIN users u ON u.id = p.author_id
+                JOIN users u ON u.id = p.author_id
                 """;
         try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
@@ -53,7 +70,7 @@ public class PostDAO {
         String query = """
                 SELECT p.id, p.title, p.body, p.updated_at, u.username AS author
                 FROM posts p
-                         JOIN users u ON u.id = p.author_id
+                JOIN users u ON u.id = p.author_id
                 WHERE p.id = ?
                 """;
         try (Connection conn = Database.getConnection();
