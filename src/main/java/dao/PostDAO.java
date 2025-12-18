@@ -1,6 +1,7 @@
 package dao;
 
 import dtos.response.PostResponseDTO;
+import exceptions.PostNotFoundException;
 import models.Post;
 import utils.PostUtils;
 
@@ -82,7 +83,7 @@ public class PostDAO {
                 return postUtils.mapRowToPost(rs);
             }
         }
-        return null;
+        throw new PostNotFoundException("NotFound - Post with id: " + id + " not found.");
     }
 
     public void updatePost(Post post) throws SQLException {

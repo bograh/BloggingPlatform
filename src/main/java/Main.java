@@ -21,7 +21,11 @@ public class Main {
 
         PostService postService = new PostService(user, postDAO, tagDAO);
 
-        postService.createPost();
+//        postService.getAllPosts();
+
+        postService.getPostById(1);
+        postService.getPostById(3);
+        postService.getPostById(999);
 
     }
 }

@@ -57,4 +57,15 @@ public class PostResponseDTO {
     public void setAuthor(String author) {
         this.author = author;
     }
+
+    @Override
+    public String toString() {
+        return "PostResponseDTO{" +
+                "postId=" + postId +
+                ", postTitle='" + postTitle + '\'' +
+                ", postBody='" + postBody + '\'' +
+                ", author='" + author + '\'' +
+                ", lastUpdated='" + lastUpdated + '\'' +
+                '}';
+    }
 }

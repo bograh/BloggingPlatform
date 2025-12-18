@@ -3,6 +3,8 @@ package services;
 import dao.PostDAO;
 import dao.TagDAO;
 import dtos.request.CreatePostDTO;
+import dtos.response.PostResponseDTO;
+import exceptions.PostNotFoundException;
 import models.Post;
 import models.Tag;
 import models.User;
@@ -57,10 +59,24 @@ public class PostService {
     }
 
     public void getAllPosts() {
+        try {
+            List<PostResponseDTO> posts = postDAO.getAllPosts();
+            System.out.println(posts);
+        } catch (SQLException e) {
+            System.out.printf("An error occurred when retrieving posts: %s", e.getMessage());
+        }
 
     }
 
     public void getPostById(int postId) {
+        try {
+            PostResponseDTO post = postDAO.getPostById(postId);
+            System.out.println(post);
+        } catch (PostNotFoundException e) {
+            System.out.println(e.getMessage());
+        } catch (SQLException e) {
+            System.out.printf("An error occurred when retrieving post with id: %d\n%s", postId, e.getMessage());
+        }
 
     }
 
