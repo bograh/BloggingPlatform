@@ -1,6 +1,6 @@
 package dao;
 
-import dtos.PostResponseDTO;
+import dtos.response.PostResponseDTO;
 import models.Post;
 import utils.PostUtils;
 

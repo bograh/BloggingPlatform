@@ -1,6 +1,6 @@
 package dao;
 
-import dtos.UserResponseDTO;
+import dtos.response.UserResponseDTO;
 import models.User;
 import utils.UserUtils;
 
@@ -35,6 +35,22 @@ public class UserDAO {
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return userUtils.mapRowToUser(rs);
+            }
+        }
+        return null;
+    }
+
+    public UserResponseDTO getUserByEmailAndPassword(String email, String password) throws SQLException {
+        UserUtils userUtils = new UserUtils();
+        String query = "SELECT * FROM users WHERE email = ? AND password = ?";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, email);
+            stmt.setString(2, password);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 return userUtils.mapRowToUser(rs);

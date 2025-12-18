@@ -1,6 +1,6 @@
 package models;
 
-import dtos.UserResponseDTO;
+import dtos.response.UserResponseDTO;
 
 import java.time.LocalDateTime;
 

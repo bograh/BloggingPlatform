@@ -1,6 +1,6 @@
 package dao;
 
-import dtos.CommentResponseDTO;
+import dtos.response.CommentResponseDTO;
 import models.Comment;
 import utils.CommentUtils;
 

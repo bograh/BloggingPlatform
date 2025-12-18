@@ -1,6 +1,6 @@
 package utils;
 
-import dtos.CommentResponseDTO;
+import dtos.response.CommentResponseDTO;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

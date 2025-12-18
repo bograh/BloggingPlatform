@@ -1,6 +1,6 @@
 package utils;
 
-import dtos.UserResponseDTO;
+import dtos.response.UserResponseDTO;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

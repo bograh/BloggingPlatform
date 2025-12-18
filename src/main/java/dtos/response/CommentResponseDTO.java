@@ -1,4 +1,4 @@
-package dtos;
+package dtos.response;
 
 public class CommentResponseDTO {
     private int commentId;

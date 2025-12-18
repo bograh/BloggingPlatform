@@ -1,4 +1,4 @@
-package dtos;
+package dtos.response;
 
 public class UserResponseDTO {
     private int userId;
