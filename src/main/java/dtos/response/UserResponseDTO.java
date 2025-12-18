@@ -47,4 +47,15 @@ public class UserResponseDTO {
     public void setUserId(int userId) {
         this.userId = userId;
     }
+
+    @Override
+    public String toString() {
+        return "User {" +
+                "\n\tuserId: " + userId +
+                ", \n\tusername: '" + username + '\'' +
+                ", \n\temail: '" + email + '\'' +
+                ", \n\tcreatedAt: '" + createdAt + '\'' +
+                '\n' + '}';
+    }
+
 }

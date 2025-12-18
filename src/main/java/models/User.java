@@ -3,13 +3,14 @@ package models;
 import dtos.response.UserResponseDTO;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-public abstract class User {
-    protected int id;
-    protected String username;
-    protected String email;
-    protected String password;
-    protected LocalDateTime createdAt;
+public class User {
+    private int id;
+    private String username;
+    private String email;
+    private String password;
+    private LocalDateTime createdAt;
 
     public User() {
     }
@@ -62,6 +63,13 @@ public abstract class User {
         this.createdAt = createdAt;
     }
 
-    public abstract UserResponseDTO getUserDetails();
+    public UserResponseDTO getUserDetails() {
+        return new UserResponseDTO(
+                this.id,
+                this.username,
+                this.email,
+                this.createdAt.format(DateTimeFormatter.ISO_DATE)
+        );
+    }
 
 }
