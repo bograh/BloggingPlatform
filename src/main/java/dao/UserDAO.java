@@ -1,5 +1,6 @@
 package dao;
 
+import config.ConnectionProvider;
 import dtos.response.UserResponseDTO;
 import models.User;
 import utils.UserUtils;
@@ -10,9 +11,19 @@ import java.util.List;
 
 public class UserDAO {
 
+    private final ConnectionProvider connectionProvider;
+
+    public UserDAO(ConnectionProvider connectionProvider) {
+        this.connectionProvider = connectionProvider;
+    }
+
+    private Connection getConnection() throws SQLException {
+        return connectionProvider.getConnection();
+    }
+
     public void addUser(User user) throws SQLException {
         String query = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, user.getUsername());
@@ -31,7 +42,7 @@ public class UserDAO {
     public UserResponseDTO getUserById(int id) throws SQLException {
         UserUtils userUtils = new UserUtils();
         String query = "SELECT * FROM users WHERE id = ?";
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, id);
@@ -46,7 +57,7 @@ public class UserDAO {
     public UserResponseDTO getUserByEmailAndPassword(String email, String password) throws SQLException {
         UserUtils userUtils = new UserUtils();
         String query = "SELECT * FROM users WHERE email = ? AND password = ?";
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setString(1, email);
@@ -63,7 +74,7 @@ public class UserDAO {
         List<UserResponseDTO> users = new ArrayList<>();
         UserUtils userUtils = new UserUtils();
         String query = "SELECT * FROM users";
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
 
@@ -76,7 +87,7 @@ public class UserDAO {
 
     public void updateUser(User user) throws SQLException {
         String query = "UPDATE users SET username=?, email=?, password=? WHERE id=?";
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setString(1, user.getUsername());
@@ -89,7 +100,7 @@ public class UserDAO {
 
     public void deleteUser(int id) throws SQLException {
         String query = "DELETE FROM users WHERE id=?";
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, id);
