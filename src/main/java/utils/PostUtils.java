@@ -20,7 +20,7 @@ public class PostUtils {
                 title,
                 body,
                 author,
-                updatedAt.format(DateTimeFormatter.BASIC_ISO_DATE)
+                updatedAt.format(DateTimeFormatter.ofPattern(Constants.DateTimeFormatPattern))
         );
     }
 }

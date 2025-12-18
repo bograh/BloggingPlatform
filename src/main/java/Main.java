@@ -1,4 +1,5 @@
 import dao.PostDAO;
+import dao.TagDAO;
 import dao.UserDAO;
 import models.User;
 import services.PostService;
@@ -11,12 +12,16 @@ public class Main {
         System.out.println("Welcome to Blogging Platform!!!");
 
         UserDAO userDAO = new UserDAO();
+        PostDAO postDAO = new PostDAO();
+        TagDAO tagDAO = new TagDAO();
+
         UserService userService = new UserService(userDAO);
 
         User user = userService.signInUser();
 
-        PostDAO postDAO = new PostDAO();
-        PostService postService = new PostService(user, postDAO);
+        PostService postService = new PostService(user, postDAO, tagDAO);
+
+        postService.createPost();
 
     }
 }

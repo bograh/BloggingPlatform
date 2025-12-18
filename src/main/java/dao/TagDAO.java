@@ -5,6 +5,7 @@ import utils.TagUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class TagDAO {
@@ -34,6 +35,33 @@ public class TagDAO {
 
             while (rs.next()) {
                 tags.add(tagUtils.mapRowToTag(rs));
+            }
+        }
+        return tags;
+    }
+
+    public List<Tag> getAllTagsFromList(List<String> tagsList) throws SQLException {
+        if (tagsList == null || tagsList.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        String placeholders = String.join(",", Collections.nCopies(tagsList.size(), "?"));
+        String query = "SELECT * FROM tags WHERE name IN (" + placeholders + ")";
+
+        List<Tag> tags = new ArrayList<>();
+        TagUtils tagUtils = new TagUtils();
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            for (int i = 0; i < tagsList.size(); i++) {
+                stmt.setString(i + 1, tagsList.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    tags.add(tagUtils.mapRowToTag(rs));
+                }
             }
         }
         return tags;
