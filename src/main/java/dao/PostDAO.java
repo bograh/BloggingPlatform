@@ -1,6 +1,8 @@
 package dao;
 
+import dtos.request.UpdatePostDTO;
 import dtos.response.PostResponseDTO;
+import exceptions.ForbiddenException;
 import exceptions.PostNotFoundException;
 import models.Post;
 import utils.PostUtils;
@@ -74,9 +76,10 @@ public class PostDAO {
                 JOIN users u ON u.id = p.author_id
                 WHERE p.id = ?
                 """;
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
 
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query);
+        ) {
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -86,8 +89,9 @@ public class PostDAO {
         throw new PostNotFoundException("NotFound - Post with id: " + id + " not found.");
     }
 
-    public void updatePost(Post post) throws SQLException {
-        String query = "UPDATE posts SET title=?, body=?, updated_at=? WHERE id=?";
+
+    public void updatePost(UpdatePostDTO post, int signedInUserId) throws SQLException {
+        String query = "UPDATE posts SET title=?, body=?, updated_at=? WHERE id=? AND author_id=?";
         try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
@@ -95,17 +99,28 @@ public class PostDAO {
             stmt.setString(2, post.getBody());
             stmt.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
             stmt.setInt(4, post.getId());
-            stmt.executeUpdate();
+            stmt.setInt(5, signedInUserId);
+
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new ForbiddenException("Forbidden - You are not permitted to update this post");
+            }
         }
     }
 
-    public void deletePost(int id) throws SQLException {
-        String query = "DELETE FROM posts WHERE id=?";
+
+    public void deletePost(int id, int signedInUserId) throws SQLException {
+        String query = "DELETE FROM posts WHERE id=? AND author_id=?";
         try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, id);
-            stmt.executeUpdate();
+            stmt.setInt(2, signedInUserId);
+
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new ForbiddenException("Forbidden - You are not permitted to delete this post");
+            }
         }
     }
 

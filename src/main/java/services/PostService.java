@@ -3,7 +3,9 @@ package services;
 import dao.PostDAO;
 import dao.TagDAO;
 import dtos.request.CreatePostDTO;
+import dtos.request.UpdatePostDTO;
 import dtos.response.PostResponseDTO;
+import exceptions.ForbiddenException;
 import exceptions.PostNotFoundException;
 import models.Post;
 import models.Tag;
@@ -80,7 +82,26 @@ public class PostService {
 
     }
 
+    /*public void updatePost(Post post) throws SQLException
+    public void deletePost(int id) throws SQLException*/
+
     public void updatePost(int postId) {
+        try {
+            UpdatePostDTO updatedPost = new UpdatePostDTO(
+                    postId,
+                    "New Post Title",
+                    "New Post Body",
+                    LocalDateTime.now()
+            );
+
+            postDAO.updatePost(updatedPost, user.getId());
+            System.out.printf("Post with id: %d updated successfully!", postId);
+
+        } catch (ForbiddenException e) {
+            System.out.println(e.getMessage());
+        } catch (SQLException e) {
+            System.out.printf("An error occurred when updating post with id: %d\n%s", postId, e.getMessage());
+        }
 
     }
 

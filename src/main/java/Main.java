@@ -26,6 +26,11 @@ public class Main {
         postService.getPostById(1);
         postService.getPostById(3);
         postService.getPostById(999);
+        postService.getPostById(2);
+        postService.getPostById(222);
+
+        postService.updatePost(1);
+        postService.updatePost(3);
 
     }
 }
