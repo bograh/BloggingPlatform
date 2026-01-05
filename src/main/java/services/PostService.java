@@ -62,24 +62,20 @@ public class PostService {
 
     public List<PostResponseDTO> getAllPosts() {
         try {
-            List<PostResponseDTO> posts = postDAO.getAllPosts();
-            System.out.println(posts);
-            return posts;
+            return postDAO.getAllPosts();
         } catch (SQLException e) {
-            System.out.printf("An error occurred when retrieving posts: %s", e.getMessage());
+            System.out.printf("An error occurred while retrieving posts: %s", e.getMessage());
         }
         return new ArrayList<>();
     }
 
     public PostResponseDTO getPostById(int postId) {
         try {
-            PostResponseDTO post = postDAO.getPostById(postId);
-            System.out.println(post);
-            return post;
+            return postDAO.getPostById(postId);
         } catch (PostNotFoundException e) {
             System.out.println(e.getMessage());
         } catch (SQLException e) {
-            System.out.printf("An error occurred when retrieving post with id: %d\n%s", postId, e.getMessage());
+            System.out.printf("An error occurred while retrieving post with id: %d\n%s", postId, e.getMessage());
         }
         return null;
     }
@@ -100,9 +96,9 @@ public class PostService {
             System.out.println(e.getMessage());
             return e.getMessage();
         } catch (SQLException e) {
-            System.out.printf("An error occurred when updating post with id: %d\n%s", postId, e.getMessage());
+            System.out.printf("An error occurred while updating post with id: %d\n%s", postId, e.getMessage());
         }
-        return String.format("An error occurred when updating post with id: %d", postId);
+        return String.format("An error occurred while updating post with id: %d", postId);
     }
 
     public String deletePost(int postId) {
@@ -115,9 +111,9 @@ public class PostService {
             System.out.println(e.getMessage());
             return e.getMessage();
         } catch (SQLException e) {
-            System.out.printf("An error occurred when updating post with id: %d\n%s", postId, e.getMessage());
+            System.out.printf("An error occurred while deleting post with id: %d\n%s", postId, e.getMessage());
         }
-        return String.format("An error occurred when updating post with id: %d", postId);
+        return String.format("An error occurred while deleting post with id: %d", postId);
     }
 
 }

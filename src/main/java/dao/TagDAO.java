@@ -1,5 +1,6 @@
 package dao;
 
+import config.ConnectionProvider;
 import models.Tag;
 import utils.TagUtils;
 
@@ -10,9 +11,19 @@ import java.util.List;
 
 public class TagDAO {
 
+    private final ConnectionProvider connectionProvider;
+
+    public TagDAO(ConnectionProvider connectionProvider) {
+        this.connectionProvider = connectionProvider;
+    }
+
+    private Connection getConnection() throws SQLException {
+        return connectionProvider.getConnection();
+    }
+
     public void addTag(String name) throws SQLException {
         String query = "INSERT into tags (name) VALUES (?)";
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, name);
@@ -29,7 +40,7 @@ public class TagDAO {
         List<Tag> tags = new ArrayList<>();
         TagUtils tagUtils = new TagUtils();
 
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
 
@@ -51,7 +62,7 @@ public class TagDAO {
         List<Tag> tags = new ArrayList<>();
         TagUtils tagUtils = new TagUtils();
 
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             for (int i = 0; i < tagsList.size(); i++) {
