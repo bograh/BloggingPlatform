@@ -11,7 +11,7 @@ import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class UserServiceTest {
+public class UserServiceTest {
 
     private UserService userService;
 
