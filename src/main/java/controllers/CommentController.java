@@ -3,7 +3,9 @@ package controllers;
 import dtos.request.CreateCommentDTO;
 import dtos.response.CommentResponseDTO;
 import services.CommentService;
+import utils.QueryTimingLogger;
 
+import java.time.Instant;
 import java.util.List;
 
 public class CommentController {
@@ -15,19 +17,31 @@ public class CommentController {
     }
 
     public String addCommentToPost(CreateCommentDTO createCommentDTO) {
-        return commentService.addCommentToPost();
+        Instant start = Instant.now();
+        String response = commentService.addCommentToPost();
+        QueryTimingLogger.log("addCommentToPost", start, Instant.now());
+        return response;
     }
 
     public List<CommentResponseDTO> getAllCommentsByPostId(int postId) {
-        return commentService.getAllCommentsByPostId(postId);
+        Instant start = Instant.now();
+        List<CommentResponseDTO> comments = commentService.getAllCommentsByPostId(postId);
+        QueryTimingLogger.log("getAllCommentsForPost", start, Instant.now());
+        return comments;
     }
 
     public CommentResponseDTO getCommentById(int commentId) {
-        return commentService.getCommentById(commentId);
+        Instant start = Instant.now();
+        CommentResponseDTO comment = commentService.getCommentById(commentId);
+        QueryTimingLogger.log("getCommentById", start, Instant.now());
+        return comment;
     }
 
     public String deleteComment(int commentId) {
-        return commentService.deleteComment(commentId);
+        Instant start = Instant.now();
+        String response = commentService.deleteComment(commentId);
+        QueryTimingLogger.log("deleteComment", start, Instant.now());
+        return response;
     }
 
 }

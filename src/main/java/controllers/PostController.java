@@ -4,7 +4,9 @@ import dtos.request.CreatePostDTO;
 import dtos.request.UpdatePostDTO;
 import dtos.response.PostResponseDTO;
 import services.PostService;
+import utils.QueryTimingLogger;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,15 +29,24 @@ public class PostController {
         tagsList.add("JavaFX");
         tagsList.add("PostgreSQL");
 
-        return postService.createPost(dto, tagsList);
+        Instant start = Instant.now();
+        String response = postService.createPost(dto, tagsList);
+        QueryTimingLogger.log("createPost", start, Instant.now());
+        return response;
     }
 
     public List<PostResponseDTO> getAllPosts() {
-        return postService.getAllPosts();
+        Instant start = Instant.now();
+        List<PostResponseDTO> posts = postService.getAllPosts();
+        QueryTimingLogger.log("getAllPosts", start, Instant.now());
+        return posts;
     }
 
     public PostResponseDTO getPostById(int postId) {
-        return postService.getPostById(postId);
+        Instant start = Instant.now();
+        PostResponseDTO post = postService.getPostById(postId);
+        QueryTimingLogger.log("getPostByID", start, Instant.now());
+        return post;
     }
 
     public String updatePost(int postId) {
@@ -45,10 +56,16 @@ public class PostController {
                 "New Post Body",
                 LocalDateTime.now()
         );
-        return postService.updatePost(updatedPost);
+        Instant start = Instant.now();
+        String response = postService.updatePost(updatedPost);
+        QueryTimingLogger.log("updatePost", start, Instant.now());
+        return response;
     }
 
     public String deletePost(int postId) {
-        return postService.deletePost(postId);
+        Instant start = Instant.now();
+        String response = postService.deletePost(postId);
+        QueryTimingLogger.log("deletePost", start, Instant.now());
+        return response;
     }
 }

@@ -94,7 +94,7 @@ public class CommentDAO {
     }
 
     public void deleteComment(int id, int signedInUserId) throws SQLException {
-        String query = "DELETE FROM comment WHERE id=? AND author_id=?";
+        String query = "DELETE FROM comments WHERE id=? AND author_id=?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
