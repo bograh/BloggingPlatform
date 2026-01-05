@@ -6,7 +6,6 @@ import dao.CommentDAO;
 import dao.PostDAO;
 import dao.TagDAO;
 import dao.UserDAO;
-import dtos.request.CreateCommentDTO;
 import dtos.request.CreatePostDTO;
 import dtos.response.CommentResponseDTO;
 import dtos.response.PostResponseDTO;
@@ -58,7 +57,7 @@ public class Main {
                     .max()
                     .orElse(0));
 
-            commentController.addCommentToPost(new CreateCommentDTO("", 1));
+            commentController.addCommentToPost();
             List<CommentResponseDTO> comments = commentController.getAllCommentsByPostId(1);
             commentController.getCommentById(1);
             commentController.deleteComment(comments.stream()

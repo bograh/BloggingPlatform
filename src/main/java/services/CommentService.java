@@ -24,12 +24,7 @@ public class CommentService {
         this.commentDAO = commentDAO;
     }
 
-    public String addCommentToPost() {
-        CreateCommentDTO newComment = new CreateCommentDTO(
-                "Good read",
-                1
-        );
-
+    public String addCommentToPost(CreateCommentDTO newComment) {
         Comment comment = new Comment(
                 0,
                 newComment.getPostId(),
