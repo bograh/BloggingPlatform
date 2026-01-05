@@ -45,7 +45,7 @@ public class PostService {
             postDAO.addPost(post, tagIds);
             return "Blog post created successfully!!";
         } catch (SQLException e) {
-            System.out.printf("Error occurred while creating post: %s", e.getMessage());
+            System.out.printf("Error occurred while creating post: %s\n", e.getMessage());
         }
         return "An error occurred while creating post";
     }
@@ -54,7 +54,7 @@ public class PostService {
         try {
             return postDAO.getAllPosts();
         } catch (SQLException e) {
-            System.out.printf("An error occurred while retrieving posts: %s", e.getMessage());
+            System.out.printf("An error occurred while retrieving posts: %s\n", e.getMessage());
         }
         return new ArrayList<>();
     }
@@ -65,7 +65,7 @@ public class PostService {
         } catch (PostNotFoundException e) {
             System.out.println(e.getMessage());
         } catch (SQLException e) {
-            System.out.printf("An error occurred while retrieving post with id: %d\n%s", postId, e.getMessage());
+            System.out.printf("An error occurred while retrieving post with id: %d\n%s\n", postId, e.getMessage());
         }
         return null;
     }
@@ -79,7 +79,7 @@ public class PostService {
             System.out.println(e.getMessage());
             return e.getMessage();
         } catch (SQLException e) {
-            System.out.printf("An error occurred while updating post with id: %d\n%s", updatePostDTO.getId(), e.getMessage());
+            System.out.printf("An error occurred while updating post with id: %d\n%s\n", updatePostDTO.getId(), e.getMessage());
         }
         return String.format("An error occurred while updating post with id: %d", updatePostDTO.getId());
     }
@@ -94,7 +94,7 @@ public class PostService {
             System.out.println(e.getMessage());
             return e.getMessage();
         } catch (SQLException e) {
-            System.out.printf("An error occurred while deleting post with id: %d\n%s", postId, e.getMessage());
+            System.out.printf("An error occurred while deleting post with id: %d\n%s\n", postId, e.getMessage());
         }
         return String.format("An error occurred while deleting post with id: %d", postId);
     }

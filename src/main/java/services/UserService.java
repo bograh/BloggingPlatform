@@ -40,8 +40,8 @@ public class UserService {
     }
 
     public User signInUser() {
-        String email = "test@email.com";
-        String password = "password";
+        String email = "ben@email.com";
+        String password = "password1";
 
         try {
             UserResponseDTO userResponse = userDAO.getUserByEmailAndPassword(email, password);

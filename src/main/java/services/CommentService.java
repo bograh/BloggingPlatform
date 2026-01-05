@@ -27,7 +27,7 @@ public class CommentService {
     public String addCommentToPost() {
         CreateCommentDTO newComment = new CreateCommentDTO(
                 "Good read",
-                2
+                1
         );
 
         Comment comment = new Comment(
@@ -42,7 +42,7 @@ public class CommentService {
             commentDAO.addComment(comment);
             return "Comment added to post successfully!!";
         } catch (SQLException e) {
-            System.out.printf("Error occurred while creating comment: %s", e.getMessage());
+            System.out.printf("Error occurred while creating comment: %s\n", e.getMessage());
         }
         return "An error occurred while creating comment";
     }
@@ -53,7 +53,7 @@ public class CommentService {
         } catch (PostNotFoundException e) {
             System.out.println(e.getMessage());
         } catch (SQLException e) {
-            System.out.printf("An error occurred while retrieving comment for post with id: %d\n%s", postId, e.getMessage());
+            System.out.printf("An error occurred while retrieving comment for post with id: %d\n%s\n", postId, e.getMessage());
         }
         return new ArrayList<>();
     }
@@ -64,7 +64,7 @@ public class CommentService {
         } catch (CommentNotFoundException e) {
             System.out.println(e.getMessage());
         } catch (SQLException e) {
-            System.out.printf("An error occurred while retrieving comment with id: %d\n%s", commentId, e.getMessage());
+            System.out.printf("An error occurred while retrieving comment with id: %d\n%s\n", commentId, e.getMessage());
         }
         return null;
     }
@@ -77,7 +77,7 @@ public class CommentService {
             System.out.println(e.getMessage());
             return e.getMessage();
         } catch (SQLException e) {
-            System.out.printf("An error occurred while deleting comment with id: %d\n%s", commentId, e.getMessage());
+            System.out.printf("An error occurred while deleting comment with id: %d\n%s\n", commentId, e.getMessage());
         }
         return String.format("An error occurred while deleting comment with id: %d", commentId);
     }
