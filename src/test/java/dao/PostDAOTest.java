@@ -26,38 +26,7 @@ public class PostDAOTest {
         provider = new H2ConnectionProvider();
         postDAO = new PostDAO(provider);
 
-        try (Connection conn = provider.getConnection();
-             Statement stmt = conn.createStatement()) {
-
-            stmt.execute("DROP TABLE IF EXISTS post_tags");
-            stmt.execute("DROP TABLE IF EXISTS posts");
-            stmt.execute("DROP TABLE IF EXISTS users");
-            stmt.execute("""
-                        CREATE TABLE users (
-                            id SERIAL PRIMARY KEY,
-                            username VARCHAR(255) NOT NULL,
-                            email VARCHAR(255) NOT NULL,
-                            password VARCHAR(255) NOT NULL,
-                            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-                        )
-                    """);
-            stmt.execute("""
-                        CREATE TABLE posts (
-                            id SERIAL PRIMARY KEY,
-                            title VARCHAR(255) NOT NULL,
-                            body TEXT NOT NULL,
-                            author_id INT NOT NULL,
-                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            FOREIGN KEY (author_id) REFERENCES users(id)
-                        )
-                    """);
-            stmt.execute("""
-                        CREATE TABLE post_tags (
-                            post_id INT NOT NULL,
-                            tag_id INT NOT NULL
-                        )
-                    """);
-        }
+        TestDatabaseSetup.reset(provider);
     }
 
     @Test

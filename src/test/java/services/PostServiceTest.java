@@ -3,6 +3,7 @@ package services;
 import config.H2ConnectionProvider;
 import dao.PostDAO;
 import dao.TagDAO;
+import dao.TestDatabaseSetup;
 import dtos.request.CreatePostDTO;
 import dtos.request.UpdatePostDTO;
 import dtos.response.PostResponseDTO;
@@ -35,11 +36,10 @@ public class PostServiceTest {
         TagDAO tagDAO = new TagDAO(provider);
         postService = new PostService(TEST_USER, postDAO, tagDAO);
 
+        TestDatabaseSetup.reset(provider);
+
         try (Connection conn = provider.getConnection();
              Statement stmt = conn.createStatement()) {
-
-            dropTables(stmt);
-            createSchema(stmt);
             seedData(stmt);
         }
     }
