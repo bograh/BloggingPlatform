@@ -6,10 +6,16 @@ import dao.CommentDAO;
 import dao.PostDAO;
 import dao.TagDAO;
 import dao.UserDAO;
+import dtos.request.CreateCommentDTO;
+import dtos.request.CreatePostDTO;
+import dtos.response.CommentResponseDTO;
+import dtos.response.PostResponseDTO;
 import models.User;
 import services.CommentService;
 import services.PostService;
 import services.UserService;
+
+import java.util.List;
 
 
 public class Main {
@@ -38,7 +44,31 @@ public class Main {
         PostController postController = new PostController(postService);
         CommentController commentController = new CommentController(commentService);
 
-//        postService.getAllPosts();
+
+        int i = 3;
+        while (i > 0) {
+            userController.registerUser();
+            userController.signInUser();
+            postController.createPost(new CreatePostDTO());
+            List<PostResponseDTO> posts = postController.getAllPosts();
+            postController.getPostById(1);
+            postController.updatePost(3);
+            postController.deletePost(posts.stream()
+                    .mapToInt(PostResponseDTO::getPostId)
+                    .max()
+                    .orElse(0));
+
+            commentController.addCommentToPost(new CreateCommentDTO("", 1));
+            List<CommentResponseDTO> comments = commentController.getAllCommentsByPostId(1);
+            commentController.getCommentById(1);
+            commentController.deleteComment(comments.stream()
+                    .mapToInt(CommentResponseDTO::getCommentId)
+                    .max()
+                    .orElse(0));
+
+            i--;
+        }
+
 
         /*postService.getPostById(1);
         postService.getPostById(3);
