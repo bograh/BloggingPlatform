@@ -8,10 +8,9 @@ public class CreatePostDTO {
     public CreatePostDTO() {
     }
 
-    public CreatePostDTO(String title, String body, int authorId) {
+    public CreatePostDTO(String title, String body) {
         this.title = title;
         this.body = body;
-        this.authorId = authorId;
     }
 
     public String getTitle() {
