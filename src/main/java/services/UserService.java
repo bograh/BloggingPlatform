@@ -4,7 +4,6 @@ import dao.UserDAO;
 import dtos.request.CreateUserDTO;
 import dtos.response.UserResponseDTO;
 import models.User;
-import utils.RandomUserGenerator;
 import utils.UserUtils;
 
 import java.sql.SQLException;
@@ -18,8 +17,7 @@ public class UserService {
         this.userDAO = userDAO;
     }
 
-    public void registerUser() {
-        CreateUserDTO createUserDTO = RandomUserGenerator.randomUser();
+    public void registerUser(CreateUserDTO createUserDTO) {
 
         User user = new User(
                 0,
@@ -37,10 +35,7 @@ public class UserService {
         }
     }
 
-    public User signInUser() {
-        String email = "ben@email.com";
-        String password = "password1";
-
+    public User signInUser(String email, String password) {
         try {
             UserResponseDTO userResponse = userDAO.getUserByEmailAndPassword(email, password);
             if (userResponse == null) {

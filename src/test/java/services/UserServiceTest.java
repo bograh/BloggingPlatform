@@ -3,6 +3,7 @@ package services;
 import config.H2ConnectionProvider;
 import config.TestDatabaseSetup;
 import dao.UserDAO;
+import dtos.request.CreateUserDTO;
 import models.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,14 +25,23 @@ public class UserServiceTest {
 
     @Test
     void registerUser_shouldCreateUser() {
-        assertDoesNotThrow(() -> userService.registerUser());
+        assertDoesNotThrow(() -> userService.registerUser(
+                new CreateUserDTO("test", "test@email.com", "password"))
+        );
     }
 
     @Test
     void signInUser_shouldReturnUser() {
-        userService.registerUser();
+        CreateUserDTO createUserDTO = new CreateUserDTO(
+                "test", "test@email.com", "password"
+        );
 
-        User user = userService.signInUser();
+        userService.registerUser(createUserDTO);
+
+        User user = userService.signInUser(
+                createUserDTO.getEmail(),
+                createUserDTO.getPassword()
+        );
 
         assertNotNull(user);
         assertEquals("test", user.getUsername());
