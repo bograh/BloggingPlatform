@@ -1,6 +1,4 @@
-package dao;
-
-import config.ConnectionProvider;
+package config;
 
 import java.sql.Connection;
 import java.sql.SQLException;

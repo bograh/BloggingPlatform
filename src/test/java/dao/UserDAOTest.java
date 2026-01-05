@@ -1,6 +1,7 @@
 package dao;
 
 import config.H2ConnectionProvider;
+import config.TestDatabaseSetup;
 import dtos.response.UserResponseDTO;
 import models.User;
 import org.junit.jupiter.api.BeforeEach;

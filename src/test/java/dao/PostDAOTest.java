@@ -1,6 +1,7 @@
 package dao;
 
 import config.H2ConnectionProvider;
+import config.TestDatabaseSetup;
 import dtos.request.UpdatePostDTO;
 import dtos.response.PostResponseDTO;
 import exceptions.ForbiddenException;

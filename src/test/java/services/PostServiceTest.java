@@ -1,9 +1,9 @@
 package services;
 
 import config.H2ConnectionProvider;
+import config.TestDatabaseSetup;
 import dao.PostDAO;
 import dao.TagDAO;
-import dao.TestDatabaseSetup;
 import dtos.request.CreatePostDTO;
 import dtos.request.UpdatePostDTO;
 import dtos.response.PostResponseDTO;
