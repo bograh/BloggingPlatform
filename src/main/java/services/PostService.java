@@ -28,26 +28,16 @@ public class PostService {
         this.tagDAO = tagDAO;
     }
 
-    public String createPost() {
-        CreatePostDTO createPostDTO = new CreatePostDTO(
-                "Test Blog Post Title",
-                "Test Blog Post Content.....",
-                user.getId()
-        );
+    public String createPost(CreatePostDTO createPostDTO, List<String> tagsList) {
 
         Post post = new Post(
                 0,
                 createPostDTO.getTitle(),
                 createPostDTO.getBody(),
-                createPostDTO.getAuthorId(),
+                user.getId(),
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );
-
-        List<String> tagsList = new ArrayList<>();
-        tagsList.add("Java");
-        tagsList.add("JavaFX");
-        tagsList.add("PostgreSQL");
 
         try {
             List<Tag> tags = tagDAO.getAllTagsFromList(tagsList);
@@ -80,25 +70,18 @@ public class PostService {
         return null;
     }
 
-    public String updatePost(int postId) {
+    public String updatePost(UpdatePostDTO updatePostDTO) {
         try {
-            UpdatePostDTO updatedPost = new UpdatePostDTO(
-                    postId,
-                    "New Post Title",
-                    "New Post Body",
-                    LocalDateTime.now()
-            );
-
-            postDAO.updatePost(updatedPost, user.getId());
-            return String.format("Post with id: %d updated successfully!", postId);
+            postDAO.updatePost(updatePostDTO, user.getId());
+            return String.format("Post with id: %d updated successfully!", updatePostDTO.getId());
 
         } catch (ForbiddenException e) {
             System.out.println(e.getMessage());
             return e.getMessage();
         } catch (SQLException e) {
-            System.out.printf("An error occurred while updating post with id: %d\n%s", postId, e.getMessage());
+            System.out.printf("An error occurred while updating post with id: %d\n%s", updatePostDTO.getId(), e.getMessage());
         }
-        return String.format("An error occurred while updating post with id: %d", postId);
+        return String.format("An error occurred while updating post with id: %d", updatePostDTO.getId());
     }
 
     public String deletePost(int postId) {
