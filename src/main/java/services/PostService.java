@@ -28,7 +28,7 @@ public class PostService {
         this.tagDAO = tagDAO;
     }
 
-    public void createPost() {
+    public String createPost() {
         CreatePostDTO createPostDTO = new CreatePostDTO(
                 "Test Blog Post Title",
                 "Test Blog Post Content.....",
@@ -53,39 +53,38 @@ public class PostService {
             List<Tag> tags = tagDAO.getAllTagsFromList(tagsList);
             List<Integer> tagIds = new ArrayList<>(tags.stream().map(Tag::getId).toList());
             postDAO.addPost(post, tagIds);
-            System.out.println("Blog post created successfully!!");
+            return "Blog post created successfully!!";
         } catch (SQLException e) {
-            System.out.printf("Error occurred while creating posts: %s", e.getMessage());
+            System.out.printf("Error occurred while creating post: %s", e.getMessage());
         }
-
+        return "An error occurred while creating post";
     }
 
-    public void getAllPosts() {
+    public List<PostResponseDTO> getAllPosts() {
         try {
             List<PostResponseDTO> posts = postDAO.getAllPosts();
             System.out.println(posts);
+            return posts;
         } catch (SQLException e) {
             System.out.printf("An error occurred when retrieving posts: %s", e.getMessage());
         }
-
+        return new ArrayList<>();
     }
 
-    public void getPostById(int postId) {
+    public PostResponseDTO getPostById(int postId) {
         try {
             PostResponseDTO post = postDAO.getPostById(postId);
             System.out.println(post);
+            return post;
         } catch (PostNotFoundException e) {
             System.out.println(e.getMessage());
         } catch (SQLException e) {
             System.out.printf("An error occurred when retrieving post with id: %d\n%s", postId, e.getMessage());
         }
-
+        return null;
     }
 
-    /*public void updatePost(Post post) throws SQLException
-    public void deletePost(int id) throws SQLException*/
-
-    public void updatePost(int postId) {
+    public String updatePost(int postId) {
         try {
             UpdatePostDTO updatedPost = new UpdatePostDTO(
                     postId,
@@ -95,18 +94,30 @@ public class PostService {
             );
 
             postDAO.updatePost(updatedPost, user.getId());
-            System.out.printf("Post with id: %d updated successfully!", postId);
+            return String.format("Post with id: %d updated successfully!", postId);
 
         } catch (ForbiddenException e) {
             System.out.println(e.getMessage());
+            return e.getMessage();
         } catch (SQLException e) {
             System.out.printf("An error occurred when updating post with id: %d\n%s", postId, e.getMessage());
         }
-
+        return String.format("An error occurred when updating post with id: %d", postId);
     }
 
-    public void deletePost(int postId) {
+    public String deletePost(int postId) {
+        try {
 
+            postDAO.deletePost(postId, user.getId());
+            return String.format("Post with id: %d deleted successfully!\n", postId);
+
+        } catch (ForbiddenException e) {
+            System.out.println(e.getMessage());
+            return e.getMessage();
+        } catch (SQLException e) {
+            System.out.printf("An error occurred when updating post with id: %d\n%s", postId, e.getMessage());
+        }
+        return String.format("An error occurred when updating post with id: %d", postId);
     }
 
 }

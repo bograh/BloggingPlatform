@@ -2,18 +2,18 @@ package dtos.response;
 
 public class PostResponseDTO {
     private int postId;
-    private String postTitle;
-    private String postBody;
+    private String title;
+    private String body;
     private String author;
     private String lastUpdated;
 
     public PostResponseDTO() {
     }
 
-    public PostResponseDTO(int postId, String postTitle, String postBody, String author, String lastUpdated) {
+    public PostResponseDTO(int postId, String title, String body, String author, String lastUpdated) {
         this.postId = postId;
-        this.postTitle = postTitle;
-        this.postBody = postBody;
+        this.title = title;
+        this.body = body;
         this.author = author;
         this.lastUpdated = lastUpdated;
     }
@@ -26,20 +26,20 @@ public class PostResponseDTO {
         this.postId = postId;
     }
 
-    public String getPostTitle() {
-        return postTitle;
+    public String getTitle() {
+        return title;
     }
 
-    public void setPostTitle(String postTitle) {
-        this.postTitle = postTitle;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public String getPostBody() {
-        return postBody;
+    public String getBody() {
+        return body;
     }
 
-    public void setPostBody(String postBody) {
-        this.postBody = postBody;
+    public void setBody(String body) {
+        this.body = body;
     }
 
     public String getLastUpdated() {
@@ -62,8 +62,8 @@ public class PostResponseDTO {
     public String toString() {
         return "PostResponseDTO{" +
                 "postId=" + postId +
-                ", postTitle='" + postTitle + '\'' +
-                ", postBody='" + postBody + '\'' +
+                ", postTitle='" + title + '\'' +
+                ", postBody='" + body + '\'' +
                 ", author='" + author + '\'' +
                 ", lastUpdated='" + lastUpdated + '\'' +
                 '}';

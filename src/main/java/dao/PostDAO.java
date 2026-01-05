@@ -1,5 +1,6 @@
 package dao;
 
+import config.ConnectionProvider;
 import dtos.request.UpdatePostDTO;
 import dtos.response.PostResponseDTO;
 import exceptions.ForbiddenException;
@@ -14,11 +15,21 @@ import java.util.List;
 
 public class PostDAO {
 
+    private final ConnectionProvider connectionProvider;
+
+    public PostDAO(ConnectionProvider connectionProvider) {
+        this.connectionProvider = connectionProvider;
+    }
+
+    private Connection getConnection() throws SQLException {
+        return connectionProvider.getConnection();
+    }
+
     public void addPost(Post post, List<Integer> tagIds) throws SQLException {
         String postSql = "INSERT INTO posts (title, body, author_id) VALUES (?, ?, ?)";
         String tagSql = "INSERT INTO post_tags (post_id, tag_id) VALUES (?, ?)";
 
-        try (Connection conn = Database.getConnection()) {
+        try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
 
             int postId;
@@ -57,7 +68,7 @@ public class PostDAO {
                 FROM posts p
                 JOIN users u ON u.id = p.author_id
                 """;
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
 
@@ -77,7 +88,7 @@ public class PostDAO {
                 WHERE p.id = ?
                 """;
 
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
         ) {
             stmt.setInt(1, id);
@@ -92,7 +103,7 @@ public class PostDAO {
 
     public void updatePost(UpdatePostDTO post, int signedInUserId) throws SQLException {
         String query = "UPDATE posts SET title=?, body=?, updated_at=? WHERE id=? AND author_id=?";
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setString(1, post.getTitle());
@@ -111,7 +122,7 @@ public class PostDAO {
 
     public void deletePost(int id, int signedInUserId) throws SQLException {
         String query = "DELETE FROM posts WHERE id=? AND author_id=?";
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, id);
