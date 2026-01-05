@@ -19,7 +19,7 @@ public class CommentUtils {
                 id,
                 content,
                 author,
-                commentedAt.format(DateTimeFormatter.BASIC_ISO_DATE)
+                commentedAt.format(DateTimeFormatter.ofPattern(Constants.DateTimeFormatPattern))
         );
     }
 }
