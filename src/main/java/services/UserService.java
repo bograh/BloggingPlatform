@@ -4,6 +4,7 @@ import dao.UserDAO;
 import dtos.request.CreateUserDTO;
 import dtos.response.UserResponseDTO;
 import models.User;
+import utils.RandomUserGenerator;
 import utils.UserUtils;
 
 import java.sql.SQLException;
@@ -18,10 +19,7 @@ public class UserService {
     }
 
     public void registerUser() {
-        CreateUserDTO createUserDTO = new CreateUserDTO();
-        createUserDTO.setEmail("test@email.com");
-        createUserDTO.setUsername("test");
-        createUserDTO.setPassword("password");
+        CreateUserDTO createUserDTO = RandomUserGenerator.randomUser();
 
         User user = new User(
                 0,

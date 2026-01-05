@@ -31,7 +31,7 @@ public class PostService {
     public String createPost(CreatePostDTO createPostDTO, List<String> tagsList) {
 
         Post post = new Post(
-                0,
+                1,
                 createPostDTO.getTitle(),
                 createPostDTO.getBody(),
                 user.getId(),
@@ -54,10 +54,14 @@ public class PostService {
         try {
             return postDAO.getAllPosts();
         } catch (SQLException e) {
-            System.out.printf("An error occurred while retrieving posts: %s\n", e.getMessage());
+            System.out.printf(
+                    "An error occurred while retrieving posts: %s%n",
+                    e.getMessage()
+            );
+            return new ArrayList<>();
         }
-        return new ArrayList<>();
     }
+
 
     public PostResponseDTO getPostById(int postId) {
         try {
