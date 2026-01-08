@@ -1,6 +1,8 @@
 package services;
 
 import interfaces.Cache;
+import interfaces.CacheLifecycle;
+import interfaces.CacheMetrics;
 
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * Tracks cache hits and misses for performance monitoring.
  * Thread-safe implementation using ConcurrentHashMap.
  */
-public class CacheService<K, V> implements Cache<K, V> {
+public class CacheService<K, V> implements Cache<K, V>, CacheMetrics, CacheLifecycle {
 
     private final ConcurrentHashMap<K, V> cache = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<K, Long> expirationTimes = new ConcurrentHashMap<>();
@@ -88,19 +90,23 @@ public class CacheService<K, V> implements Cache<K, V> {
         cacheMisses.set(0);
     }
 
+    @Override
     public long getCacheHits() {
         return cacheHits.get();
     }
 
+    @Override
     public long getCacheMisses() {
         return cacheMisses.get();
     }
 
+    @Override
     public double getHitRatio() {
         long total = cacheHits.get() + cacheMisses.get();
         return total == 0 ? 0.0 : (double) cacheHits.get() / total;
     }
 
+    @Override
     public String getStatistics() {
         return String.format(
                 "Cache Statistics: Size=%d, Hits=%d, Misses=%d, Hit Ratio=%.2f%%",
@@ -120,6 +126,7 @@ public class CacheService<K, V> implements Cache<K, V> {
         }
     }
 
+    @Override
     public void startCleanupTask() {
         if (cleanupStarted.compareAndSet(false, true)) {
             executor.scheduleAtFixedRate(
