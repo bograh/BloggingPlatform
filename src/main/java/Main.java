@@ -31,7 +31,6 @@ public class Main {
 
         UserService userService = new UserService(userDAO);
 
-
         UserController userController = new UserController(userService);
         userController.registerUser();
         User user = userController.signInUser();
