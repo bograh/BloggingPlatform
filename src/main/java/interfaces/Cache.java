@@ -3,11 +3,11 @@ package interfaces;
 import java.util.Optional;
 
 public interface Cache<K, V> {
-    boolean set(K key, V value);
+    void set(K key, V value);
 
     Optional<V> get(K key);
 
-    void remove(K key);
+    void invalidate(K key);
 
     int size();
 

@@ -22,24 +22,23 @@ public class CacheService<K, V> implements Cache<K, V>, CacheMetrics, CacheLifec
     private final ConcurrentHashMap<K, V> cache = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<K, Long> expirationTimes = new ConcurrentHashMap<>();
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-    private final long ttlMs;
+    private final long ttlInMs;
     private final AtomicLong cacheHits = new AtomicLong();
     private final AtomicLong cacheMisses = new AtomicLong();
     private final AtomicBoolean cleanupStarted = new AtomicBoolean(false);
 
 
-    public CacheService(long ttlMs) {
-        this.ttlMs = ttlMs;
+    public CacheService(long ttlInMs) {
+        this.ttlInMs = ttlInMs;
     }
 
     @Override
-    public boolean set(K key, V value) {
+    public void set(K key, V value) {
         if (key == null || value == null)
-            return false;
+            return;
 
         cache.put(key, value);
-        expirationTimes.put(key, System.currentTimeMillis() + ttlMs);
-        return true;
+        expirationTimes.put(key, System.currentTimeMillis() + ttlInMs);
     }
 
     @Override
@@ -67,7 +66,7 @@ public class CacheService<K, V> implements Cache<K, V>, CacheMetrics, CacheLifec
     }
 
     @Override
-    public void remove(K key) {
+    public void invalidate(K key) {
         cache.remove(key);
         expirationTimes.remove(key);
     }
@@ -121,7 +120,7 @@ public class CacheService<K, V> implements Cache<K, V>, CacheMetrics, CacheLifec
     private void cleanupExpiredEntries() {
         for (K key : cache.keySet()) {
             if (isExpired(key)) {
-                remove(key);
+                invalidate(key);
             }
         }
     }
@@ -131,8 +130,8 @@ public class CacheService<K, V> implements Cache<K, V>, CacheMetrics, CacheLifec
         if (cleanupStarted.compareAndSet(false, true)) {
             executor.scheduleAtFixedRate(
                     this::cleanupExpiredEntries,
-                    ttlMs,
-                    Math.max(1, ttlMs / 2),
+                    ttlInMs,
+                    Math.max(1, ttlInMs / 2),
                     TimeUnit.MILLISECONDS
             );
         }
