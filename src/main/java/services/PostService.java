@@ -140,4 +140,9 @@ public class PostService {
                 "List Cache: " + postsListCache.getStatistics();
     }
 
+    public void clearAllCaches() {
+        postCache.clear();
+        postsListCache.clear();
+    }
+
 }
