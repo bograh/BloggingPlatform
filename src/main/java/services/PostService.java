@@ -7,20 +7,26 @@ import dtos.request.UpdatePostDTO;
 import dtos.response.PostResponseDTO;
 import exceptions.ForbiddenException;
 import exceptions.PostNotFoundException;
+import interfaces.Cache;
 import models.Post;
 import models.Tag;
 import models.User;
+import utils.Constants;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class PostService {
 
     private final User user;
     private final PostDAO postDAO;
     private final TagDAO tagDAO;
+
+    private final Cache<Integer, PostResponseDTO> postCache = new CacheService<>(300_000);
+    private final Cache<String, List<PostResponseDTO>> listCache = new CacheService<>(300_000);
 
     public PostService(User user, PostDAO postDAO, TagDAO tagDAO) {
         this.user = user;
@@ -29,7 +35,6 @@ public class PostService {
     }
 
     public String createPost(CreatePostDTO createPostDTO, List<String> tagsList) {
-
         Post post = new Post(
                 1,
                 createPostDTO.getTitle(),
@@ -43,6 +48,8 @@ public class PostService {
             List<Tag> tags = tagDAO.getAllTagsFromList(tagsList);
             List<Integer> tagIds = new ArrayList<>(tags.stream().map(Tag::getId).toList());
             postDAO.addPost(post, tagIds);
+
+            listCache.clear();
             return "Blog post created successfully!!";
         } catch (SQLException e) {
             System.out.printf("Error occurred while creating post: %s\n", e.getMessage());
@@ -51,8 +58,17 @@ public class PostService {
     }
 
     public List<PostResponseDTO> getAllPosts() {
+        Optional<List<PostResponseDTO>> cachedPosts = listCache.get(Constants.AllPostsCacheKey);
+        if (cachedPosts.isPresent()) {
+            System.out.println("[CACHE HIT] Retrieved all posts from cache");
+            return cachedPosts.get();
+        }
+
+        System.out.println("[CACHE MISS] Fetching all posts from database");
         try {
-            return postDAO.getAllPosts();
+            List<PostResponseDTO> posts = postDAO.getAllPosts();
+            listCache.set(Constants.AllPostsCacheKey, posts);
+            return posts;
         } catch (SQLException e) {
             System.out.printf(
                     "An error occurred while retrieving posts: %s%n",
@@ -64,8 +80,17 @@ public class PostService {
 
 
     public PostResponseDTO getPostById(int postId) {
+        Optional<PostResponseDTO> cachedPost = postCache.get(postId);
+        if (cachedPost.isPresent()) {
+            System.out.printf("[CACHE HIT] Retrieved post %d from cache\n", postId);
+            return cachedPost.get();
+        }
+
+        System.out.printf("[CACHE MISS] Fetching post %d from database", postId);
         try {
-            return postDAO.getPostById(postId);
+            PostResponseDTO post = postDAO.getPostById(postId);
+            postCache.set(post.getPostId(), post);
+            return post;
         } catch (PostNotFoundException e) {
             System.out.println(e.getMessage());
         } catch (SQLException e) {
@@ -77,6 +102,10 @@ public class PostService {
     public String updatePost(UpdatePostDTO updatePostDTO) {
         try {
             postDAO.updatePost(updatePostDTO, user.getId());
+
+            postCache.invalidate(updatePostDTO.getId());
+            listCache.clear();
+
             return String.format("Post with id: %d updated successfully!", updatePostDTO.getId());
 
         } catch (ForbiddenException e) {
@@ -92,6 +121,10 @@ public class PostService {
         try {
 
             postDAO.deletePost(postId, user.getId());
+
+            postCache.invalidate(postId);
+            listCache.clear();
+
             return String.format("Post with id: %d deleted successfully!\n", postId);
 
         } catch (ForbiddenException e) {
