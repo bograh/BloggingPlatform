@@ -7,6 +7,8 @@ public interface Cache<K, V> {
 
     Optional<V> get(K key);
 
+    void remove(K key);
+
     int size();
 
     boolean isEmpty();
