@@ -85,7 +85,7 @@ public class PostService {
             return cachedPost.get();
         }
 
-        System.out.printf("[CACHE MISS] Fetching post %d from database", postId);
+        System.out.printf("[CACHE MISS] Fetching post %d from database\n", postId);
         try {
             PostResponseDTO post = postDAO.getPostById(postId);
             postCache.set(post.getPostId(), post);
