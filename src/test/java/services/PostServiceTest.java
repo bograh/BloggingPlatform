@@ -15,7 +15,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.sql.Connection;
 import java.sql.Statement;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -88,7 +87,7 @@ public class PostServiceTest {
         postService.createPost(dto, List.of("Java"));
 
         UpdatePostDTO updateDTO = new UpdatePostDTO(
-                1, "New Title", "New Content", LocalDateTime.now()
+                1, "New Title", "New Content"
         );
         String response = postService.updatePost(updateDTO);
         assertTrue(response.contains("updated successfully"));
@@ -106,8 +105,7 @@ public class PostServiceTest {
         PostService otherService = new PostService(otherUser, postDAO, new TagDAO(provider));
 
         UpdatePostDTO updateDTO = new UpdatePostDTO(
-                1, "New Title", "New Content", LocalDateTime.now()
-        );
+                1, "New Title", "New Content");
         String response = otherService.updatePost(updateDTO);
         assertTrue(response.toLowerCase().contains("forbidden"));
     }

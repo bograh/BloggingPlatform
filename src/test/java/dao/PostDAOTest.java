@@ -55,7 +55,7 @@ public class PostDAOTest {
 
     @Test
     void updatePost_shouldUpdate() throws Exception {
-        UpdatePostDTO update = new UpdatePostDTO(1, "New Title", "New Body", LocalDateTime.now());
+        UpdatePostDTO update = new UpdatePostDTO(1, "New Title", "New Body");
         postDAO.updatePost(update, 1);
 
         PostResponseDTO post = postDAO.getPostById(1);
@@ -65,7 +65,7 @@ public class PostDAOTest {
     @Test
     void updatePost_notAuthor_shouldThrow() {
         Exception exception = assertThrows(ForbiddenException.class, () -> {
-            UpdatePostDTO update = new UpdatePostDTO(1, "New Title", "New Body", LocalDateTime.now());
+            UpdatePostDTO update = new UpdatePostDTO(1, "New Title", "New Body");
             postDAO.updatePost(update, 999);
         });
         assertTrue(exception.getMessage().contains("Forbidden"));
