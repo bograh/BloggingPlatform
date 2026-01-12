@@ -7,12 +7,14 @@ import dao.CommentMongoDAO;
 import dao.PostDAO;
 import dao.TagDAO;
 import dao.UserDAO;
+import dtos.request.CreateUserDTO;
 import models.CommentDocument;
 import models.User;
 import services.CommentService;
 import services.PostService;
 import services.UserService;
 import utils.Constants;
+import utils.RandomUserGenerator;
 
 import java.util.List;
 
@@ -38,8 +40,13 @@ public class Main {
         UserService userService = new UserService(userDAO);
 
         UserController userController = new UserController(userService);
-        userController.registerUser();
-        User user = userController.signInUser();
+
+        CreateUserDTO createUserDTO = RandomUserGenerator.randomUser();
+        String email = "ben@email.com";
+        String password = "password1";
+
+        userController.registerUser(createUserDTO);
+        User user = userController.signInUser(email, password);
 
         PostService postService = new PostService(user, postDAO, tagDAO);
         CommentService commentService = new CommentService(user, commentMongoDAO);
