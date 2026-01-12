@@ -135,4 +135,31 @@ public class PostDAO {
         }
     }
 
+    public List<PostResponseDTO> searchPosts(String searchQuery) throws SQLException {
+        List<PostResponseDTO> posts = new ArrayList<>();
+        PostUtils postUtils = new PostUtils();
+        String query = """
+                SELECT p.id, p.title, p.body, p.updated_at, u.username AS author
+                FROM posts p
+                JOIN users u ON u.id = p.author_id
+                WHERE p.title ILIKE ? OR p.body ILIKE ?
+                """;
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
+            String likeQuery = "%" + searchQuery + "%";
+            stmt.setString(1, likeQuery);
+            stmt.setString(2, likeQuery);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                posts.add(postUtils.mapRowToPost(rs));
+            }
+        }
+
+        return posts;
+    }
+
 }

@@ -57,4 +57,11 @@ public class PostController {
         QueryTimingLogger.log("deletePost", start, Instant.now());
         return response;
     }
+
+    public List<PostResponseDTO> searchPosts(String query) {
+        Instant start = Instant.now();
+        List<PostResponseDTO> posts = postService.searchPosts(query);
+        QueryTimingLogger.log("getAllPosts", start, Instant.now());
+        return posts;
+    }
 }

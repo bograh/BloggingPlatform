@@ -77,7 +77,6 @@ public class PostService {
         }
     }
 
-
     public PostResponseDTO getPostById(int postId) {
         Optional<PostResponseDTO> cachedPost = postCache.get(postId);
         if (cachedPost.isPresent()) {
@@ -133,6 +132,18 @@ public class PostService {
             System.out.printf("An error occurred while deleting post with id: %d\n%s\n", postId, e.getMessage());
         }
         return String.format("An error occurred while deleting post with id: %d", postId);
+    }
+
+    public List<PostResponseDTO> searchPosts(String query) {
+        try {
+            return postDAO.searchPosts(query);
+        } catch (SQLException e) {
+            System.out.printf(
+                    "An error occurred while performing search: %s%n",
+                    e.getMessage()
+            );
+            return new ArrayList<>();
+        }
     }
 
     public String getCacheStatistics() {
