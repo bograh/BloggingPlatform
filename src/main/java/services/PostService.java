@@ -179,7 +179,7 @@ public class PostService {
         if (authorUsername == null || authorUsername.isBlank()) {
             return new ArrayList<>();
         }
-        
+
         String cacheKey = "search_author_" + authorUsername.toLowerCase();
         Optional<List<PostResponseDTO>> cachedResults = postsListCache.get(cacheKey);
         if (cachedResults.isPresent()) {
