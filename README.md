@@ -69,7 +69,7 @@ indexing, caching, sorting, and searching to enhance performance and scalability
 ### PostgreSQL Schema (Relational)
 
 The relational database is normalized to **Third Normal Form (3NF)** to eliminate data redundancy and ensure data
-integrity.
+The relational database is normalized to **Third Normal Form (3NF)** to eliminate data redundancy and ensure data integrity. For a detailed visual representation of the database schema and relationships, see [SCHEMA_DIAGRAM.md](docs/SCHEMA_DIAGRAM.md).
 
 #### Core Entities
 
