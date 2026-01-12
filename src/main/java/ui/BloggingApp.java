@@ -29,7 +29,7 @@ public class BloggingApp extends Application {
     private PostController postController;
     private CommentController commentController;
 
-    public static void main(String[] args) {
+    public static void init(String[] args) {
         launch(args);
     }
 

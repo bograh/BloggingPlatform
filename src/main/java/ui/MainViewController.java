@@ -19,7 +19,9 @@ import models.User;
 import utils.SortingUtils;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MainViewController {
@@ -27,6 +29,7 @@ public class MainViewController {
     private final PostController postController;
     private final CommentController commentController;
     private final User currentUser;
+    private final Map<String, Boolean> sortAscendingMap = new HashMap<>();
     private BorderPane view;
     private VBox postsContainer;
     private Label statusLabel;
@@ -36,6 +39,9 @@ public class MainViewController {
         this.postController = postController;
         this.commentController = commentController;
         this.currentUser = currentUser;
+
+        initializeView();
+        loadPosts();
     }
 
     private void initializeView() {
@@ -71,11 +77,11 @@ public class MainViewController {
         MenuItem createPostItem = new MenuItem("Create New Post");
         createPostItem.setOnAction(e -> showCreatePostDialog());
         MenuItem sortByDateItem = new MenuItem("Sort by Date");
-        sortByDateItem.setOnAction(e -> sortPosts("date", false));
+        sortByDateItem.setOnAction(e -> sortPosts("date"));
         MenuItem sortByTitleItem = new MenuItem("Sort by Title");
-        sortByTitleItem.setOnAction(e -> sortPosts("title", true));
+        sortByTitleItem.setOnAction(e -> sortPosts("title"));
         MenuItem sortByAuthorItem = new MenuItem("Sort by Author");
-        sortByAuthorItem.setOnAction(e -> sortPosts("author", true));
+        sortByAuthorItem.setOnAction(e -> sortPosts("author"));
         postMenu.getItems().addAll(createPostItem, new SeparatorMenuItem(),
                 sortByDateItem, sortByTitleItem, sortByAuthorItem);
 
@@ -194,8 +200,8 @@ public class MainViewController {
 
                 if (response.contains("successfully")) {
                     commentArea.clear();
-                    dialog.close();
                     showAlert("Success", response, Alert.AlertType.INFORMATION);
+
                 } else {
                     showAlert("Error", response, Alert.AlertType.ERROR);
                 }
@@ -333,7 +339,11 @@ public class MainViewController {
     }
 
 
-    private void sortPosts(String sortBy, boolean ascending) {
+    private void sortPosts(String sortBy) {
+        boolean ascending = sortAscendingMap.getOrDefault(sortBy, true);
+        ascending = !ascending; // toggle
+        sortAscendingMap.put(sortBy, ascending);
+
         List<PostResponseDTO> posts = postController.getAllPosts();
         SortingUtils.sortPosts(posts, sortBy, ascending);
 

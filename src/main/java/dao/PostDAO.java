@@ -67,6 +67,7 @@ public class PostDAO {
                 SELECT p.id, p.title, p.body, p.updated_at, u.username AS author
                 FROM posts p
                 JOIN users u ON u.id = p.author_id
+                ORDER BY p.posted_at DESC
                 """;
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query);
@@ -166,7 +167,7 @@ public class PostDAO {
         List<PostResponseDTO> posts = new ArrayList<>();
         PostUtils postUtils = new PostUtils();
         String query = """
-                SELECT DISTINCT p.id, p.title, p.body, p.updated_at, u.username AS author
+                SELECT p.id, p.title, p.body, p.updated_at, u.username AS author
                 FROM posts p
                 JOIN users u ON u.id = p.author_id
                 JOIN post_tags pt ON p.id = pt.post_id
