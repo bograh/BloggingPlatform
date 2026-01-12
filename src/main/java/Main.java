@@ -3,7 +3,7 @@ import config.PostgresConnectionProvider;
 import controllers.CommentController;
 import controllers.PostController;
 import controllers.UserController;
-import dao.CommentMongoDAO;
+import dao.CommentDAO;
 import dao.PostDAO;
 import dao.TagDAO;
 import dao.UserDAO;
@@ -29,12 +29,12 @@ public class Main {
 
         PostDAO postDAO = new PostDAO(connectionProvider);
         TagDAO tagDAO = new TagDAO(connectionProvider);
-        CommentMongoDAO commentMongoDAO = new CommentMongoDAO(
+        CommentDAO commentDAO = new CommentDAO(
                 MongoConnection.getDatabase(),
                 Constants.CommentsMongoCollection
         );
 
-        System.out.println(commentMongoDAO.getAllCommentsByPostId(1));
+        System.out.println(commentDAO.getAllCommentsByPostId(1));
         System.out.println();
 
         UserService userService = new UserService(userDAO);
@@ -49,7 +49,7 @@ public class Main {
         User user = userController.signInUser(email, password);
 
         PostService postService = new PostService(user, postDAO, tagDAO);
-        CommentService commentService = new CommentService(user, commentMongoDAO);
+        CommentService commentService = new CommentService(user, commentDAO);
 
 
         PostController postController = new PostController(postService);

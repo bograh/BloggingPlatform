@@ -30,11 +30,11 @@ public class UserService {
 
         try {
             userDAO.addUser(user);
-            System.out.println("User created successfully!!");
-            return "User created successfully!!";
+            System.out.println("User created successfully!! Please login.");
+            return "User created successfully!! Please login.";
         } catch (UserExistsException | SQLException e) {
             System.out.printf("Error creating user: %s\n", e.getMessage());
-            return String.format("Error creating user: %s\n", e.getMessage());
+            return String.format("Registration failed: %s\n", e.getMessage());
         }
     }
 

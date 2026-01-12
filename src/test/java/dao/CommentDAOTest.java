@@ -19,17 +19,17 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CommentMongoDAOTest {
+public class CommentDAOTest {
 
     private static final String COLLECTION_NAME = "comments_test";
 
-    private CommentMongoDAO commentMongoDAO;
+    private CommentDAO commentDAO;
     private MongoCollection<Document> testCommentCollection;
 
     @BeforeEach
     void setUp() {
         MongoDatabase mongoDatabase = MongoConnectionTest.getDatabase();
-        commentMongoDAO = new CommentMongoDAO(mongoDatabase, COLLECTION_NAME);
+        commentDAO = new CommentDAO(mongoDatabase, COLLECTION_NAME);
         testCommentCollection = mongoDatabase.getCollection(COLLECTION_NAME);
     }
 
@@ -61,7 +61,7 @@ public class CommentMongoDAOTest {
         comment.setPostId(postId);
         comment.setAuthorId(authorId);
 
-        commentMongoDAO.createComment(comment, author);
+        commentDAO.createComment(comment, author);
 
         assertEquals(1, testCommentCollection.countDocuments());
 
@@ -81,7 +81,7 @@ public class CommentMongoDAOTest {
         testCommentCollection.insertOne(createCommentDoc("Other post", 2, 103, "John"));
 
         List<CommentDocument> comments =
-                commentMongoDAO.getAllCommentsByPostId(1);
+                commentDAO.getAllCommentsByPostId(1);
 
         assertEquals(2, comments.size());
         assertTrue(comments.stream().allMatch(c -> c.getPostId() == 1));
@@ -96,7 +96,7 @@ public class CommentMongoDAOTest {
         Document doc = createCommentDoc("Deletable", 1, authorId, author);
         testCommentCollection.insertOne(doc);
 
-        boolean deleted = commentMongoDAO.deleteComment(
+        boolean deleted = commentDAO.deleteComment(
                 doc.getObjectId("_id").toHexString(),
                 authorId
         );
@@ -112,7 +112,7 @@ public class CommentMongoDAOTest {
 
         assertThrows(
                 ForbiddenException.class,
-                () -> commentMongoDAO.deleteComment(
+                () -> commentDAO.deleteComment(
                         doc.getObjectId("_id").toHexString(),
                         999
                 )

@@ -18,11 +18,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CommentMongoDAO {
+public class CommentDAO {
 
     private final MongoCollection<Document> commentsCollection;
 
-    public CommentMongoDAO(MongoDatabase mongoDatabase, String collection) {
+    public CommentDAO(MongoDatabase mongoDatabase, String collection) {
         this.commentsCollection = mongoDatabase.getCollection(collection);
     }
 

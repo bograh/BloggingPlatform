@@ -1,6 +1,6 @@
 package services;
 
-import dao.CommentMongoDAO;
+import dao.CommentDAO;
 import dtos.request.CreateCommentDTO;
 import exceptions.CommentNotFoundException;
 import exceptions.ForbiddenException;
@@ -19,11 +19,11 @@ public class CommentService {
 
     private final CacheService<String, CommentDocument> commentCache = new CacheService<>(300_000);
     private final CacheService<String, List<CommentDocument>> commentsListCache = new CacheService<>(300_000);
-    private final CommentMongoDAO commentMongoDAO;
+    private final CommentDAO commentDAO;
 
-    public CommentService(User user, CommentMongoDAO commentMongoDAO) {
+    public CommentService(User user, CommentDAO commentDAO) {
         this.user = user;
-        this.commentMongoDAO = commentMongoDAO;
+        this.commentDAO = commentDAO;
     }
 
     public String addCommentToPost(CreateCommentDTO newComment) {
@@ -36,7 +36,7 @@ public class CommentService {
         );
 
         try {
-            commentMongoDAO.createComment(comment, user.getUsername());
+            commentDAO.createComment(comment, user.getUsername());
 
             commentsListCache.invalidate("post_" + newComment.getPostId());
 
@@ -58,7 +58,7 @@ public class CommentService {
 
         System.out.println("[CACHE MISS] Fetching comments for post " + postId + " from database");
         try {
-            List<CommentDocument> comments = commentMongoDAO.getAllCommentsByPostId(postId);
+            List<CommentDocument> comments = commentDAO.getAllCommentsByPostId(postId);
             commentsListCache.set(cacheKey, comments);
             return comments;
         } catch (Exception e) {
@@ -76,7 +76,7 @@ public class CommentService {
 
         System.out.println("[CACHE MISS] Fetching comment " + commentId + " from database");
         try {
-            CommentDocument comment = commentMongoDAO.getCommentById(commentId);
+            CommentDocument comment = commentDAO.getCommentById(commentId);
             commentCache.set(commentId, comment);
             return comment;
         } catch (CommentNotFoundException e) {
@@ -89,7 +89,7 @@ public class CommentService {
 
     public String deleteComment(String commentId) {
         try {
-            boolean deleteSuccessful = commentMongoDAO.deleteComment(commentId, user.getId());
+            boolean deleteSuccessful = commentDAO.deleteComment(commentId, user.getId());
             if (deleteSuccessful) {
                 commentCache.invalidate(commentId);
                 commentsListCache.clear();

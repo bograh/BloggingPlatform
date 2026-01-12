@@ -7,7 +7,6 @@ import services.PostService;
 import utils.QueryTimingLogger;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 public class PostController {
@@ -18,14 +17,9 @@ public class PostController {
         this.postService = postService;
     }
 
-    public String createPost(CreatePostDTO createPostDTO) {
-        List<String> tagsList = new ArrayList<>();
-        tagsList.add("Java");
-        tagsList.add("JavaFX");
-        tagsList.add("PostgreSQL");
-
+    public String createPost(CreatePostDTO createPostDTO, List<String> tags) {
         Instant start = Instant.now();
-        String response = postService.createPost(createPostDTO, tagsList);
+        String response = postService.createPost(createPostDTO, tags);
         QueryTimingLogger.log("createPost", start, Instant.now());
         return response;
     }

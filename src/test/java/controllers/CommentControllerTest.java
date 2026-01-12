@@ -3,7 +3,7 @@ package controllers;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import config.MongoConnectionTest;
-import dao.CommentMongoDAO;
+import dao.CommentDAO;
 import dtos.request.CreateCommentDTO;
 import models.CommentDocument;
 import models.User;
@@ -32,8 +32,8 @@ public class CommentControllerTest {
     @BeforeEach
     void setUp() {
         MongoDatabase database = MongoConnectionTest.getDatabase();
-        CommentMongoDAO commentMongoDAO = new CommentMongoDAO(database, COLLECTION_NAME);
-        commentService = new CommentService(TEST_USER, commentMongoDAO);
+        CommentDAO commentDAO = new CommentDAO(database, COLLECTION_NAME);
+        commentService = new CommentService(TEST_USER, commentDAO);
         commentController = new CommentController(commentService);
 
         testCommentCollection = database.getCollection(COLLECTION_NAME);

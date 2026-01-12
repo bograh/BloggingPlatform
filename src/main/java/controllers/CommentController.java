@@ -16,11 +16,7 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    public String addCommentToPost() {
-        CreateCommentDTO createCommentDTO = new CreateCommentDTO(
-                "Good read",
-                1
-        );
+    public String addCommentToPost(CreateCommentDTO createCommentDTO) {
         Instant start = Instant.now();
         String response = commentService.addCommentToPost(createCommentDTO);
         QueryTimingLogger.log("addCommentToPost", start, Instant.now());

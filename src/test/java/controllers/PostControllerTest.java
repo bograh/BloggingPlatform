@@ -16,6 +16,8 @@ import services.PostService;
 import services.UserService;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,14 +51,16 @@ public class PostControllerTest {
     @Test
     void createPost_returnsSuccessMessage() {
         CreatePostDTO dto = new CreatePostDTO("Test Title", "Test Content");
-        String response = postController.createPost(dto);
+        List<String> tags = new ArrayList<>(Arrays.asList("Java", "JavaFX"));
+        String response = postController.createPost(dto, tags);
         assertEquals("Blog post created successfully!!", response);
     }
 
     @Test
     void getAllPosts_returnsPosts() {
-        postController.createPost(new CreatePostDTO("Title 1", "Content 1"));
-        postController.createPost(new CreatePostDTO("Title 2", "Content 2"));
+        List<String> tags = new ArrayList<>(Arrays.asList("Java", "JavaFX"));
+        postController.createPost(new CreatePostDTO("Title 1", "Content 1"), tags);
+        postController.createPost(new CreatePostDTO("Title 2", "Content 2"), tags);
 
         List<PostResponseDTO> posts = postController.getAllPosts();
         assertEquals(2, posts.size());
@@ -64,7 +68,8 @@ public class PostControllerTest {
 
     @Test
     void getPostById_returnsCorrectPost() {
-        postController.createPost(new CreatePostDTO("Title", "Content"));
+        List<String> tags = new ArrayList<>(Arrays.asList("Java", "JavaFX"));
+        postController.createPost(new CreatePostDTO("Title", "Content"), tags);
         PostResponseDTO createdPost = postController.getAllPosts().getFirst();
         PostResponseDTO fetched = postController.getPostById(createdPost.getPostId());
         assertNotNull(fetched);
@@ -73,7 +78,8 @@ public class PostControllerTest {
 
     @Test
     void updatePost_returnsSuccessMessage() {
-        postController.createPost(new CreatePostDTO("Old Title", "Old Body"));
+        List<String> tags = new ArrayList<>(Arrays.asList("Java", "JavaFX"));
+        postController.createPost(new CreatePostDTO("Old Title", "Old Body"), tags);
         PostResponseDTO created = postController.getAllPosts().getFirst();
 
         UpdatePostDTO updateDto = new UpdatePostDTO(created.getPostId(), "New Title", "New Body");
@@ -87,7 +93,8 @@ public class PostControllerTest {
 
     @Test
     void deletePost_returnsSuccessMessage() {
-        postController.createPost(new CreatePostDTO("Title", "Body"));
+        List<String> tags = new ArrayList<>(Arrays.asList("Java", "JavaFX"));
+        postController.createPost(new CreatePostDTO("Title", "Body"), tags);
         PostResponseDTO created = postController.getAllPosts().getFirst();
 
         String response = postController.deletePost(created.getPostId());
@@ -106,9 +113,10 @@ public class PostControllerTest {
 
     @Test
     void searchTest_returnsTotalResults() {
-        postController.createPost(new CreatePostDTO("To Search", "Some content"));
-        postController.createPost(new CreatePostDTO("Excluded", "Some content"));
-        postController.createPost(new CreatePostDTO("Included", "Some search result"));
+        List<String> tags = new ArrayList<>(Arrays.asList("Java", "JavaFX"));
+        postController.createPost(new CreatePostDTO("To Search", "Some content"), tags);
+        postController.createPost(new CreatePostDTO("Excluded", "Some content"), tags);
+        postController.createPost(new CreatePostDTO("Included", "Some search result"), tags);
 
         List<PostResponseDTO> searchResponse = postController.searchPosts("search");
         assertEquals(2, searchResponse.size());
