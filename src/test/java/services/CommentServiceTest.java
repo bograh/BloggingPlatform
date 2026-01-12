@@ -1,117 +1,108 @@
 package services;
 
-import config.H2ConnectionProvider;
-import config.TestDatabaseSetup;
-import dao.CommentDAO;
-import dao.PostDAO;
-import dao.TagDAO;
-import dao.UserDAO;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import config.MongoConnectionTest;
+import dao.CommentMongoDAO;
 import dtos.request.CreateCommentDTO;
-import dtos.request.CreatePostDTO;
-import dtos.response.CommentResponseDTO;
+import models.CommentDocument;
 import models.User;
+import org.bson.Document;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import java.sql.SQLException;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CommentServiceTest {
 
+    private static final String COLLECTION_NAME = "comments_test";
     private static final User TEST_USER =
             new User(1, "test", "test@test.com", "pass", null);
 
-    private static final Integer postId = 1;
-
-    private CommentDAO commentDAO;
     private CommentService commentService;
+    private MongoCollection<Document> testCommentCollection;
 
     @BeforeEach
-    void setUp() throws Exception {
-        H2ConnectionProvider provider = new H2ConnectionProvider();
-        commentDAO = new CommentDAO(provider);
-        UserDAO userDAO = new UserDAO(provider);
-        PostService postService = new PostService(TEST_USER, new PostDAO(provider), new TagDAO(provider));
-        commentService = new CommentService(TEST_USER, commentDAO);
+    void setUp() {
+        MongoDatabase database = MongoConnectionTest.getDatabase();
 
-        TestDatabaseSetup.reset(provider);
+        CommentMongoDAO commentMongoDAO = new CommentMongoDAO(
+                database,
+                COLLECTION_NAME
+        );
 
-        userDAO.addUser(TEST_USER);
-        CreatePostDTO dto = new CreatePostDTO("Sample Post", "Sample Content");
-        postService.createPost(dto, List.of("Java"));
+        testCommentCollection = database.getCollection(COLLECTION_NAME);
+
+        commentService = new CommentService(TEST_USER, commentMongoDAO);
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (testCommentCollection != null) {
+            testCommentCollection.drop();
+        }
     }
 
     @Test
-    void addCommentToPost_shouldReturnSuccessMessage() {
-        CreateCommentDTO dto =
-                new CreateCommentDTO("Nice article", postId);
+    void addCommentToPost_success() {
+        CreateCommentDTO dto = new CreateCommentDTO("Nice post", 1);
 
         String result = commentService.addCommentToPost(dto);
 
-        assertEquals("Comment added to post successfully!!", result);
+        assertEquals(
+                "Comment added to post successfully!!",
+                result
+        );
+
+        assertEquals(1, testCommentCollection.countDocuments());
     }
 
-    @Test
-    void getAllCommentsByPostId_shouldReturnComments() {
-        CreateCommentDTO dto =
-                new CreateCommentDTO("First comment", postId);
+    @ParameterizedTest
+    @ValueSource(ints = {1, 5, 10})
+    void getAllCommentsByPostId_cacheHit(int postId) {
+        insertComment(postId, 1);
+        insertComment(postId, 2);
 
-        commentService.addCommentToPost(dto);
-
-        List<CommentResponseDTO> comments =
+        List<CommentDocument> first =
                 commentService.getAllCommentsByPostId(postId);
 
-        assertFalse(comments.isEmpty());
-        assertEquals("First comment", comments.getFirst().getComment());
-    }
-
-    @Test
-    void getAllCommentsByPostId_shouldReturnEmptyListIfPostNotFound() {
-        List<CommentResponseDTO> comments =
-                commentService.getAllCommentsByPostId(9999);
-
-        assertTrue(comments.isEmpty());
-    }
-
-    @Test
-    void getCommentById_shouldReturnComment() {
-        CreateCommentDTO dto =
-                new CreateCommentDTO("Hello", postId);
-
-        commentService.addCommentToPost(dto);
-
-        List<CommentResponseDTO> comments =
+        List<CommentDocument> second =
                 commentService.getAllCommentsByPostId(postId);
 
-        CommentResponseDTO found =
-                commentService.getCommentById(comments.getFirst().getCommentId());
-
-        assertNotNull(found);
-        assertEquals("Hello", found.getComment());
+        assertEquals(2, first.size());
+        assertSame(first, second);
     }
 
+    @Test
+    void getAllCommentsByPostId_exception_returnsEmptyList() {
+        testCommentCollection.drop();
+
+        List<CommentDocument> result =
+                commentService.getAllCommentsByPostId(99);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
 
     @Test
-    void getCommentById_shouldReturnNullIfNotFound() {
-        CommentResponseDTO result =
-                commentService.getCommentById(9999);
+    void getCommentById_notFound_returnsNull() {
+        CommentDocument result =
+                commentService.getCommentById(
+                        "507f1f77bcf86cd799439011"
+                );
 
         assertNull(result);
     }
 
-
     @Test
-    void deleteComment_shouldDeleteIfOwner() {
-        CreateCommentDTO dto =
-                new CreateCommentDTO("To delete", postId);
-
-        commentService.addCommentToPost(dto);
-
-        int commentId =
-                commentService.getAllCommentsByPostId(postId).getFirst().getCommentId();
+    void deleteComment_success() {
+        String commentId = insertComment(1, TEST_USER.getId());
 
         String result =
                 commentService.deleteComment(commentId);
@@ -120,27 +111,40 @@ public class CommentServiceTest {
                 "Comment with id: " + commentId + " deleted successfully!",
                 result
         );
-    }
 
+        assertEquals(0, testCommentCollection.countDocuments());
+    }
 
     @Test
-    void deleteComment_shouldReturnForbiddenMessage() throws SQLException {
-        CreateCommentDTO dto =
-                new CreateCommentDTO("Protected", postId);
+    void deleteComment_forbidden_returnsMessage() {
+        String commentId = insertComment(1, 99);
 
-        commentService.addCommentToPost(dto);
-
-        int commentId =
-                commentService.getAllCommentsByPostId(1).getFirst().getCommentId();
-
-        User anotherUser = new User(999, "kate", "k@mail.com", "123", LocalDateTime.now());
-        CommentService otherUserService =
-                new CommentService(anotherUser, commentDAO);
-
-        String result =
-                otherUserService.deleteComment(commentId);
-
-        assertTrue(result.contains("Forbidden"));
+        String result = commentService.deleteComment(commentId);
+        assertTrue(result.toLowerCase().contains("forbidden"));
     }
 
+    @Test
+    void clearAllCaches_doesNotThrow() {
+        assertDoesNotThrow(() -> commentService.clearAllCaches());
+    }
+
+    @Test
+    void getCacheStatistics_returnsText() {
+        String stats = commentService.getCacheStatistics();
+
+        assertTrue(stats.contains("Comment Cache"));
+        assertTrue(stats.contains("Comment List Cache"));
+    }
+
+    private String insertComment(int postId, int authorId) {
+        Document doc = new Document()
+                .append("postId", postId)
+                .append("authorId", authorId)
+                .append("author", "testUser")
+                .append("comment", "Test comment")
+                .append("commentedAt", new Date());
+
+        testCommentCollection.insertOne(doc);
+        return doc.getObjectId("_id").toHexString();
+    }
 }
