@@ -3,6 +3,7 @@ package dao;
 import config.H2ConnectionProvider;
 import config.TestDatabaseSetup;
 import dtos.response.UserResponseDTO;
+import exceptions.UserExistsException;
 import models.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,9 +20,9 @@ public class UserDAOTest {
     @BeforeEach
     void setUp() throws Exception {
         H2ConnectionProvider provider = new H2ConnectionProvider();
-        userDAO = new UserDAO(provider);
-
         TestDatabaseSetup.reset(provider);
+
+        userDAO = new UserDAO(provider);
     }
 
 
@@ -38,6 +39,22 @@ public class UserDAOTest {
         userDAO.addUser(user);
 
         assertTrue(user.getId() > 0);
+    }
+
+    @Test
+    void addUser_shouldFailDueToConflict() throws Exception {
+        User user = new User(
+                0,
+                "john",
+                "john@email.com",
+                "password",
+                LocalDateTime.now()
+        );
+
+        userDAO.addUser(user);
+        assertTrue(user.getId() > 0);
+
+        assertThrows(UserExistsException.class, () -> userDAO.addUser(user));
     }
 
     @Test

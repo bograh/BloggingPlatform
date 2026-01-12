@@ -2,6 +2,7 @@ package dao;
 
 import config.ConnectionProvider;
 import dtos.response.UserResponseDTO;
+import exceptions.UserExistsException;
 import models.User;
 import utils.UserUtils;
 
@@ -22,18 +23,30 @@ public class UserDAO {
     }
 
     public void addUser(User user) throws SQLException {
-        String query = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
+        String checkQuery = "SELECT COUNT(*) FROM users WHERE username = ? OR email = ?";
         try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
 
-            stmt.setString(1, user.getUsername());
-            stmt.setString(2, user.getEmail());
-            stmt.setString(3, user.getPassword());
-            stmt.executeUpdate();
+            checkStmt.setString(1, user.getUsername());
+            checkStmt.setString(2, user.getEmail());
 
-            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    user.setId(generatedKeys.getInt(1));
+            try (ResultSet rs = checkStmt.executeQuery()) {
+                if (rs.next() && rs.getInt(1) > 0) {
+                    throw new UserExistsException("Conflict - User with this username or email already exists");
+                }
+            }
+
+            String insertQuery = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
+            try (PreparedStatement insertStmt = conn.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS)) {
+                insertStmt.setString(1, user.getUsername());
+                insertStmt.setString(2, user.getEmail());
+                insertStmt.setString(3, user.getPassword());
+                insertStmt.executeUpdate();
+
+                try (ResultSet generatedKeys = insertStmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        user.setId(generatedKeys.getInt(1));
+                    }
                 }
             }
         }
@@ -108,4 +121,3 @@ public class UserDAO {
         }
     }
 }
-

@@ -3,6 +3,7 @@ package services;
 import dao.UserDAO;
 import dtos.request.CreateUserDTO;
 import dtos.response.UserResponseDTO;
+import exceptions.UserExistsException;
 import models.User;
 import utils.UserUtils;
 
@@ -17,7 +18,7 @@ public class UserService {
         this.userDAO = userDAO;
     }
 
-    public void registerUser(CreateUserDTO createUserDTO) {
+    public String registerUser(CreateUserDTO createUserDTO) {
 
         User user = new User(
                 0,
@@ -29,9 +30,11 @@ public class UserService {
 
         try {
             userDAO.addUser(user);
-            System.out.println("User created successfully!!");
-        } catch (SQLException e) {
+            System.out.println("User created successfully!! Please login.");
+            return "User created successfully!! Please login.";
+        } catch (UserExistsException | SQLException e) {
             System.out.printf("Error creating user: %s\n", e.getMessage());
+            return String.format("Registration failed: %s\n", e.getMessage());
         }
     }
 

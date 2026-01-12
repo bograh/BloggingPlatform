@@ -1,146 +1,123 @@
 package dao;
 
-import config.H2ConnectionProvider;
-import config.TestDatabaseSetup;
-import dtos.response.CommentResponseDTO;
-import exceptions.CommentNotFoundException;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import config.MongoConnectionTest;
 import exceptions.ForbiddenException;
-import exceptions.PostNotFoundException;
 import models.Comment;
+import models.CommentDocument;
+import org.bson.Document;
+import org.bson.types.ObjectId;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-import java.sql.*;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CommentDAOTest {
 
-    private CommentDAO commentDAO;
+    private static final String COLLECTION_NAME = "comments_test";
 
-    private int userId;
-    private int postId;
+    private CommentDAO commentDAO;
+    private MongoCollection<Document> testCommentCollection;
 
     @BeforeEach
-    void setup() throws SQLException {
-        H2ConnectionProvider provider = new H2ConnectionProvider();
-        commentDAO = new CommentDAO(provider);
+    void setUp() {
+        MongoDatabase mongoDatabase = MongoConnectionTest.getDatabase();
+        commentDAO = new CommentDAO(mongoDatabase, COLLECTION_NAME);
+        testCommentCollection = mongoDatabase.getCollection(COLLECTION_NAME);
+    }
 
-        TestDatabaseSetup.reset(provider);
-
-        try (Connection conn = provider.getConnection()) {
-            PreparedStatement userStmt = conn.prepareStatement(
-                    "INSERT INTO users (username, email, password) VALUES ('john', 'john@email.com', 'password')",
-                    Statement.RETURN_GENERATED_KEYS
-            );
-            userStmt.executeUpdate();
-            ResultSet userKeys = userStmt.getGeneratedKeys();
-            userKeys.next();
-            userId = userKeys.getInt(1);
-
-            PreparedStatement postStmt = conn.prepareStatement(
-                    "INSERT INTO posts (title, body, author_id) VALUES ('Post', 'Body', ?)",
-                    Statement.RETURN_GENERATED_KEYS
-            );
-            postStmt.setInt(1, userId);
-            postStmt.executeUpdate();
-            ResultSet postKeys = postStmt.getGeneratedKeys();
-            postKeys.next();
-            postId = postKeys.getInt(1);
+    @AfterEach
+    void tearDown() {
+        if (testCommentCollection != null) {
+            testCommentCollection.drop();
         }
     }
 
-    @Test
-    void addComment_shouldPersistAndSetId() throws SQLException {
+    private Document createCommentDoc(String content, int postId, int authorId, String author) {
+        return new Document("_id", new ObjectId())
+                .append("content", content)
+                .append("postId", postId)
+                .append("authorId", authorId)
+                .append("author", author)
+                .append("commentedAt", new Date());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "Nice post!, 1, 101, John",
+            "Great article, 2, 202, Alice",
+            "Thanks for sharing, 3, 303, Bob"
+    })
+    void testCreateComment(String content, int postId, int authorId, String author) {
         Comment comment = new Comment();
+        comment.setContent(content);
         comment.setPostId(postId);
-        comment.setAuthorId(userId);
-        comment.setContent("Nice post!");
+        comment.setAuthorId(authorId);
 
-        commentDAO.addComment(comment);
-        assertTrue(comment.getId() > 0);
+        commentDAO.createComment(comment, author);
 
-        CommentResponseDTO persisted = commentDAO.getCommentById(comment.getId());
+        assertEquals(1, testCommentCollection.countDocuments());
 
-        assertNotNull(persisted);
-        assertEquals("john", persisted.getAuthor());
-        assertEquals("Nice post!", persisted.getComment());
-
-
+        Document stored = testCommentCollection.find().first();
+        assertNotNull(stored);
+        assertEquals(content, stored.getString("content"));
+        assertEquals(postId, stored.getInteger("postId"));
+        assertEquals(authorId, stored.getInteger("authorId"));
+        assertEquals(author, stored.getString("author"));
+        assertNotNull(stored.getDate("commentedAt"));
     }
 
     @Test
-    void getAllCommentsByPostId_shouldReturnComments() throws SQLException {
-        Comment comment = new Comment();
-        comment.setPostId(postId);
-        comment.setAuthorId(userId);
-        comment.setContent("First comment");
-        commentDAO.addComment(comment);
+    void testGetAllCommentsByPostId() {
+        testCommentCollection.insertOne(createCommentDoc("First", 1, 101, "Alice"));
+        testCommentCollection.insertOne(createCommentDoc("Second", 1, 102, "Bob"));
+        testCommentCollection.insertOne(createCommentDoc("Other post", 2, 103, "John"));
 
-        List<CommentResponseDTO> comments =
-                commentDAO.getAllCommentsByPostId(postId);
+        List<CommentDocument> comments =
+                commentDAO.getAllCommentsByPostId(1);
 
-        assertFalse(comments.isEmpty());
-        assertEquals("First comment", comments.getFirst().getComment());
+        assertEquals(2, comments.size());
+        assertTrue(comments.stream().allMatch(c -> c.getPostId() == 1));
     }
 
-    @Test
-    void getAllCommentsByPostId_shouldThrowIfPostNotFound() {
-        assertThrows(PostNotFoundException.class, () ->
-                commentDAO.getAllCommentsByPostId(9999)
+    @ParameterizedTest
+    @CsvSource({
+            "Alice, 101, true",
+            "Bob, 102, true"
+    })
+    void testDeleteComment_Success(String author, int authorId, boolean expected) {
+        Document doc = createCommentDoc("Deletable", 1, authorId, author);
+        testCommentCollection.insertOne(doc);
+
+        boolean deleted = commentDAO.deleteComment(
+                doc.getObjectId("_id").toHexString(),
+                authorId
         );
+
+        assertEquals(expected, deleted);
+        assertEquals(0, testCommentCollection.countDocuments());
     }
 
     @Test
-    void getCommentById_shouldReturnComment() throws SQLException {
-        Comment comment = new Comment();
-        comment.setPostId(postId);
-        comment.setAuthorId(userId);
-        comment.setContent("Hello");
+    void testDeleteComment_Forbidden() {
+        Document doc = createCommentDoc("Protected", 1, 101, "Alice");
+        testCommentCollection.insertOne(doc);
 
-        commentDAO.addComment(comment);
-
-        CommentResponseDTO response =
-                commentDAO.getCommentById(comment.getId());
-
-        assertEquals("Hello", response.getComment());
-    }
-
-    @Test
-    void getCommentById_shouldThrowIfNotFound() {
-        assertThrows(CommentNotFoundException.class, () ->
-                commentDAO.getCommentById(9999)
+        assertThrows(
+                ForbiddenException.class,
+                () -> commentDAO.deleteComment(
+                        doc.getObjectId("_id").toHexString(),
+                        999
+                )
         );
+
+        assertEquals(1, testCommentCollection.countDocuments());
     }
-
-    @Test
-    void deleteComment_shouldDeleteIfOwner() throws SQLException {
-        Comment comment = new Comment();
-        comment.setPostId(postId);
-        comment.setAuthorId(userId);
-        comment.setContent("To delete");
-
-        commentDAO.addComment(comment);
-
-        assertDoesNotThrow(() ->
-                commentDAO.deleteComment(comment.getId(), userId)
-        );
-    }
-
-    @Test
-    void deleteComment_shouldThrowForbiddenIfNotOwner() throws SQLException {
-        Comment comment = new Comment();
-        comment.setPostId(postId);
-        comment.setAuthorId(userId);
-        comment.setContent("Protected");
-
-        commentDAO.addComment(comment);
-
-        assertThrows(ForbiddenException.class, () ->
-                commentDAO.deleteComment(comment.getId(), userId + 1)
-        );
-    }
-
-
 }

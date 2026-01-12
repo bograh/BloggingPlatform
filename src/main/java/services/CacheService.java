@@ -1,5 +1,144 @@
 package services;
 
-public class CacheService<K, V> {
+import interfaces.Cache;
+import interfaces.CacheLifecycle;
+import interfaces.CacheMetrics;
+
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+
+/**
+ * In-memory cache implementation using ConcurrentHashMap.
+ * Tracks cache hits and misses for performance monitoring.
+ * Thread-safe implementation using ConcurrentHashMap.
+ */
+public class CacheService<K, V> implements Cache<K, V>, CacheMetrics, CacheLifecycle {
+
+    private final ConcurrentHashMap<K, V> cache = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<K, Long> expirationTimes = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private final long ttlInMs;
+    private final AtomicLong cacheHits = new AtomicLong();
+    private final AtomicLong cacheMisses = new AtomicLong();
+    private final AtomicBoolean cleanupStarted = new AtomicBoolean(false);
+
+
+    public CacheService(long ttlInMs) {
+        this.ttlInMs = ttlInMs;
+    }
+
+    @Override
+    public void set(K key, V value) {
+        if (key == null || value == null)
+            return;
+
+        cache.put(key, value);
+        expirationTimes.put(key, System.currentTimeMillis() + ttlInMs);
+    }
+
+    @Override
+    public Optional<V> get(K key) {
+        if (key == null) {
+            cacheMisses.incrementAndGet();
+            return Optional.empty();
+        }
+
+        if (isExpired(key)) {
+            cache.remove(key);
+            expirationTimes.remove(key);
+            cacheMisses.incrementAndGet();
+            return Optional.empty();
+        }
+
+        V value = cache.get(key);
+        if (value != null) {
+            cacheHits.incrementAndGet();
+            return Optional.of(value);
+        }
+
+        cacheMisses.incrementAndGet();
+        return Optional.empty();
+    }
+
+    @Override
+    public void invalidate(K key) {
+        cache.remove(key);
+        expirationTimes.remove(key);
+    }
+
+    @Override
+    public int size() {
+        return cache.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return cache.isEmpty();
+    }
+
+    @Override
+    public void clear() {
+        cache.clear();
+        expirationTimes.clear();
+        cacheHits.set(0);
+        cacheMisses.set(0);
+    }
+
+    @Override
+    public long getCacheHits() {
+        return cacheHits.get();
+    }
+
+    @Override
+    public long getCacheMisses() {
+        return cacheMisses.get();
+    }
+
+    @Override
+    public double getHitRatio() {
+        long total = cacheHits.get() + cacheMisses.get();
+        return total == 0 ? 0.0 : (double) cacheHits.get() / total;
+    }
+
+    @Override
+    public String getStatistics() {
+        return String.format(
+                "Cache Statistics: Size=%d, Hits=%d, Misses=%d, Hit Ratio=%.2f%%",
+                size(), cacheHits.get(), cacheMisses.get(), getHitRatio() * 100);
+    }
+
+    private boolean isExpired(K key) {
+        Long expirationTime = expirationTimes.get(key);
+        return expirationTime == null || System.currentTimeMillis() > expirationTime;
+    }
+
+    private void cleanupExpiredEntries() {
+        for (K key : cache.keySet()) {
+            if (isExpired(key)) {
+                invalidate(key);
+            }
+        }
+    }
+
+    @Override
+    public void startCleanupTask() {
+        if (cleanupStarted.compareAndSet(false, true)) {
+            executor.scheduleAtFixedRate(
+                    this::cleanupExpiredEntries,
+                    ttlInMs,
+                    Math.max(1, ttlInMs / 2),
+                    TimeUnit.MILLISECONDS
+            );
+        }
+    }
+
+    public void shutdown() {
+        executor.shutdown();
+    }
 
 }

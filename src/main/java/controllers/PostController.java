@@ -7,8 +7,6 @@ import services.PostService;
 import utils.QueryTimingLogger;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 public class PostController {
@@ -19,18 +17,9 @@ public class PostController {
         this.postService = postService;
     }
 
-    public String createPost(CreatePostDTO createPostDTO) {
-        CreatePostDTO dto = new CreatePostDTO(
-                "Test Blog Post Title",
-                "Test Blog Post Content....."
-        );
-        List<String> tagsList = new ArrayList<>();
-        tagsList.add("Java");
-        tagsList.add("JavaFX");
-        tagsList.add("PostgreSQL");
-
+    public String createPost(CreatePostDTO createPostDTO, List<String> tags) {
         Instant start = Instant.now();
-        String response = postService.createPost(dto, tagsList);
+        String response = postService.createPost(createPostDTO, tags);
         QueryTimingLogger.log("createPost", start, Instant.now());
         return response;
     }
@@ -49,13 +38,7 @@ public class PostController {
         return post;
     }
 
-    public String updatePost(int postId) {
-        UpdatePostDTO updatedPost = new UpdatePostDTO(
-                postId,
-                "New Post Title",
-                "New Post Body",
-                LocalDateTime.now()
-        );
+    public String updatePost(UpdatePostDTO updatedPost) {
         Instant start = Instant.now();
         String response = postService.updatePost(updatedPost);
         QueryTimingLogger.log("updatePost", start, Instant.now());
@@ -67,5 +50,26 @@ public class PostController {
         String response = postService.deletePost(postId);
         QueryTimingLogger.log("deletePost", start, Instant.now());
         return response;
+    }
+
+    public List<PostResponseDTO> searchPosts(String query) {
+        Instant start = Instant.now();
+        List<PostResponseDTO> posts = postService.searchPosts(query);
+        QueryTimingLogger.log("searchPosts", start, Instant.now());
+        return posts;
+    }
+
+    public List<PostResponseDTO> searchPostsByTag(String tagName) {
+        Instant start = Instant.now();
+        List<PostResponseDTO> posts = postService.searchPostsByTag(tagName);
+        QueryTimingLogger.log("searchPostsByTag", start, Instant.now());
+        return posts;
+    }
+
+    public List<PostResponseDTO> searchPostsByAuthor(String authorUsername) {
+        Instant start = Instant.now();
+        List<PostResponseDTO> posts = postService.searchPosts(authorUsername);
+        QueryTimingLogger.log("searchPostsByAuthor", start, Instant.now());
+        return posts;
     }
 }
