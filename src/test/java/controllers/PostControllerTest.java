@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PostControllerTest {
 
     private PostController postController;
-    private User user;
 
     @BeforeEach
     void setUp() throws SQLException {
@@ -39,7 +38,7 @@ public class PostControllerTest {
 
         CreateUserDTO createUserDTO = new CreateUserDTO("test", email, password);
         userController.registerUser(createUserDTO);
-        user = userController.signInUser(email, password);
+        User user = userController.signInUser(email, password);
 
         PostDAO postDAO = new PostDAO(connectionProvider);
         TagDAO tagDAO = new TagDAO(connectionProvider);
@@ -103,6 +102,22 @@ public class PostControllerTest {
     void deletePost_cannotDeletePost() {
         String response = postController.deletePost(999);
         assertTrue(response.toLowerCase().contains("forbidden"));
+    }
+
+    @Test
+    void searchTest_returnsTotalResults() {
+        postController.createPost(new CreatePostDTO("To Search", "Some content"));
+        postController.createPost(new CreatePostDTO("Excluded", "Some content"));
+        postController.createPost(new CreatePostDTO("Included", "Some search result"));
+
+        List<PostResponseDTO> searchResponse = postController.searchPosts("search");
+        assertEquals(2, searchResponse.size());
+    }
+
+    @Test
+    void searchTest_returnsNoResults() {
+        List<PostResponseDTO> searchResponse = postController.searchPosts("search");
+        assertEquals(0, searchResponse.size());
     }
 
 

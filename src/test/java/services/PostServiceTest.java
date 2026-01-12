@@ -134,6 +134,23 @@ public class PostServiceTest {
         assertTrue(response.toLowerCase().contains("forbidden"));
     }
 
+    @Test
+    void searchTest_shouldReturnTotalResults() {
+        postService.createPost(new CreatePostDTO("To Search", "Some content"), List.of("Java"));
+        postService.createPost(new CreatePostDTO("Excluded", "Some content"), List.of("Java"));
+        postService.createPost(new CreatePostDTO("Included", "Some search result"), List.of("Java"));
+
+        List<PostResponseDTO> searchResponse = postService.searchPosts("search");
+
+        assertEquals(2, searchResponse.size());
+    }
+
+    @Test
+    void searchTest_shouldReturnNoResults() {
+        List<PostResponseDTO> searchResponse = postService.searchPosts("search");
+        assertEquals(0, searchResponse.size());
+    }
+
     private void seedData(Statement stmt) throws Exception {
         stmt.execute("""
                     INSERT INTO users (id, username, email, password)
