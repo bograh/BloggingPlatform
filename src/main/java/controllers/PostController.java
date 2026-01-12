@@ -55,7 +55,21 @@ public class PostController {
     public List<PostResponseDTO> searchPosts(String query) {
         Instant start = Instant.now();
         List<PostResponseDTO> posts = postService.searchPosts(query);
-        QueryTimingLogger.log("getAllPosts", start, Instant.now());
+        QueryTimingLogger.log("searchPosts", start, Instant.now());
+        return posts;
+    }
+
+    public List<PostResponseDTO> searchPostsByTag(String tagName) {
+        Instant start = Instant.now();
+        List<PostResponseDTO> posts = postService.searchPostsByTag(tagName);
+        QueryTimingLogger.log("searchPostsByTag", start, Instant.now());
+        return posts;
+    }
+
+    public List<PostResponseDTO> searchPostsByAuthor(String authorUsername) {
+        Instant start = Instant.now();
+        List<PostResponseDTO> posts = postService.searchPosts(authorUsername);
+        QueryTimingLogger.log("searchPostsByAuthor", start, Instant.now());
         return posts;
     }
 }

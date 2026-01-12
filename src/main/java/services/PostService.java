@@ -146,6 +146,48 @@ public class PostService {
         }
     }
 
+    public List<PostResponseDTO> searchPostsByTag(String tagName) {
+        String cacheKey = "search_tag_" + tagName.toLowerCase();
+        Optional<List<PostResponseDTO>> cachedResults = postsListCache.get(cacheKey);
+        if (cachedResults.isPresent()) {
+            System.out.println("[CACHE HIT] Retrieved tag search results from cache");
+            return cachedResults.get();
+        }
+
+        System.out.println("[CACHE MISS] Fetching tag search results from database");
+        try {
+            List<PostResponseDTO> results = postDAO.searchPostsByTag(tagName);
+            if (!results.isEmpty()) {
+                postsListCache.set(cacheKey, results);
+            }
+            return results;
+        } catch (SQLException e) {
+            System.out.printf("An error occurred while searching posts by tag: %s%n", e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<PostResponseDTO> searchPostsByAuthor(String authorUsername) {
+        String cacheKey = "search_author_" + authorUsername.toLowerCase();
+        Optional<List<PostResponseDTO>> cachedResults = postsListCache.get(cacheKey);
+        if (cachedResults.isPresent()) {
+            System.out.println("[CACHE HIT] Retrieved author search results from cache");
+            return cachedResults.get();
+        }
+
+        System.out.println("[CACHE MISS] Fetching author search results from database");
+        try {
+            List<PostResponseDTO> results = postDAO.searchPostsByAuthor(authorUsername);
+            if (!results.isEmpty()) {
+                postsListCache.set(cacheKey, results);
+            }
+            return results;
+        } catch (SQLException e) {
+            System.out.printf("An error occurred while searching posts by author: %s%n", e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
     public String getCacheStatistics() {
         return "Post Cache: " + postCache.getStatistics() + "\n" +
                 "List Cache: " + postsListCache.getStatistics();

@@ -89,7 +89,7 @@ public class PostDAO {
                 """;
 
         try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query);
+             PreparedStatement stmt = conn.prepareStatement(query)
         ) {
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
@@ -147,7 +147,7 @@ public class PostDAO {
 
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
-            
+
             String likeQuery = "%" + searchQuery + "%";
             stmt.setString(1, likeQuery);
             stmt.setString(2, likeQuery);
@@ -159,6 +159,57 @@ public class PostDAO {
             }
         }
 
+        return posts;
+    }
+
+    public List<PostResponseDTO> searchPostsByTag(String tagName) throws SQLException {
+        List<PostResponseDTO> posts = new ArrayList<>();
+        PostUtils postUtils = new PostUtils();
+        String query = """
+                SELECT DISTINCT p.id, p.title, p.body, p.updated_at, u.username AS author
+                FROM posts p
+                JOIN users u ON u.id = p.author_id
+                JOIN post_tags pt ON p.id = pt.post_id
+                JOIN tags t ON pt.tag_id = t.id
+                WHERE LOWER(t.name) = LOWER(?)
+                ORDER BY p.posted_at DESC
+                """;
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, tagName);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    posts.add(postUtils.mapRowToPost(rs));
+                }
+            }
+        }
+        return posts;
+    }
+
+    public List<PostResponseDTO> searchPostsByAuthor(String authorUsername) throws SQLException {
+        List<PostResponseDTO> posts = new ArrayList<>();
+        PostUtils postUtils = new PostUtils();
+        String query = """
+                SELECT p.id, p.title, p.body, p.updated_at, u.username AS author
+                FROM posts p
+                JOIN users u ON u.id = p.author_id
+                WHERE LOWER(u.username) LIKE LOWER(?)
+                ORDER BY p.posted_at DESC
+                """;
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            String searchPattern = "%" + authorUsername + "%";
+            stmt.setString(1, searchPattern);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    posts.add(postUtils.mapRowToPost(rs));
+                }
+            }
+        }
         return posts;
     }
 
