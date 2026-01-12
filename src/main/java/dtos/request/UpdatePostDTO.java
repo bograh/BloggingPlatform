@@ -1,21 +1,17 @@
 package dtos.request;
 
-import java.time.LocalDateTime;
-
 public class UpdatePostDTO {
     private int id;
     private String title;
     private String body;
-    private LocalDateTime updatedAt;
 
     public UpdatePostDTO() {
     }
 
-    public UpdatePostDTO(int id, String title, String body, LocalDateTime updatedAt) {
+    public UpdatePostDTO(int id, String title, String body) {
         this.id = id;
         this.title = title;
         this.body = body;
-        this.updatedAt = updatedAt;
     }
 
     public int getId() {
@@ -42,11 +38,4 @@ public class UpdatePostDTO {
         this.body = body;
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 }

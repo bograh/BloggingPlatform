@@ -7,7 +7,6 @@ import services.PostService;
 import utils.QueryTimingLogger;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,17 +19,13 @@ public class PostController {
     }
 
     public String createPost(CreatePostDTO createPostDTO) {
-        CreatePostDTO dto = new CreatePostDTO(
-                "Test Blog Post Title",
-                "Test Blog Post Content....."
-        );
         List<String> tagsList = new ArrayList<>();
         tagsList.add("Java");
         tagsList.add("JavaFX");
         tagsList.add("PostgreSQL");
 
         Instant start = Instant.now();
-        String response = postService.createPost(dto, tagsList);
+        String response = postService.createPost(createPostDTO, tagsList);
         QueryTimingLogger.log("createPost", start, Instant.now());
         return response;
     }
@@ -49,13 +44,7 @@ public class PostController {
         return post;
     }
 
-    public String updatePost(int postId) {
-        UpdatePostDTO updatedPost = new UpdatePostDTO(
-                postId,
-                "New Post Title",
-                "New Post Body",
-                LocalDateTime.now()
-        );
+    public String updatePost(UpdatePostDTO updatedPost) {
         Instant start = Instant.now();
         String response = postService.updatePost(updatedPost);
         QueryTimingLogger.log("updatePost", start, Instant.now());
