@@ -1,0 +1,106 @@
+/* BlogFX Application Stylesheet */
+
+.root {
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-font-size: 14px;
+}
+
+/* Buttons */
+.button {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+    -fx-background-radius: 4px;
+}
+
+.button:hover {
+    -fx-background-color: #0056b3;
+}
+
+.button:pressed {
+    -fx-background-color: #004085;
+}
+
+/* Text Fields */
+.text-field, .text-area, .password-field {
+    -fx-background-color: white;
+    -fx-border-color: #ced4da;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 6px 12px;
+}
+
+.text-field:focused, .text-area:focused, .password-field:focused {
+    -fx-border-color: #007bff;
+    -fx-border-width: 2px;
+}
+
+/* Labels */
+.label {
+    -fx-text-fill: #212529;
+}
+
+/* Menu Bar */
+.menu-bar {
+    -fx-background-color: #343a40;
+}
+
+.menu-bar .label {
+    -fx-text-fill: white;
+}
+
+.menu-bar .menu:hover {
+    -fx-background-color: #495057;
+}
+
+/* Menu items */
+.menu-item .label {
+    -fx-text-fill: #1c1c1c; /* default text color for all menu items */
+}
+
+/* Hover effect for menu items */
+.menu-item:hover .label {
+    -fx-text-fill: #ffffff; /* text stays white on hover */
+}
+
+/* Optional: change hover background separately */
+.menu-item:hover {
+    -fx-background-color: #007bff; /* lighter blue or brand color */
+}
+
+/* Specific menu item colors (example) */
+.menu-item.refresh-item .label {
+    -fx-text-fill: #28a745; /* green for Refresh */
+}
+
+.menu-item.exit-item .label {
+    -fx-text-fill: #dc3545; /* red for Exit */
+}
+
+/* Dialogs */
+.dialog-pane {
+    -fx-background-color: white;
+}
+
+.dialog-pane .button-bar .button {
+    -fx-min-width: 80px;
+}
+
+/* Scroll Pane */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: #f8f9fa;
+}
+
+/* ComboBox */
+.combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #ced4da;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+}
