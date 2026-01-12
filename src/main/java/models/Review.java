@@ -5,20 +5,20 @@ import java.time.LocalDateTime;
 public class Review {
     private int id;
     private int postId;
-    private int userId;
-    private int rating;
-    private String content;
+    private int reviewerId;
+    private int ratings;
+    private String review;
     private LocalDateTime createdAt;
 
     public Review() {
     }
 
-    public Review(int id, int postId, int userId, int rating, String content, LocalDateTime createdAt) {
+    public Review(int id, int postId, int reviewerId, int ratings, String review, LocalDateTime createdAt) {
         this.id = id;
         this.postId = postId;
-        this.userId = userId;
-        this.rating = rating;
-        this.content = content;
+        this.reviewerId = reviewerId;
+        this.ratings = ratings;
+        this.review = review;
         this.createdAt = createdAt;
     }
 
@@ -38,28 +38,28 @@ public class Review {
         this.postId = postId;
     }
 
-    public int getUserId() {
-        return userId;
+    public int getReviewerId() {
+        return reviewerId;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setReviewerId(int reviewerId) {
+        this.reviewerId = reviewerId;
     }
 
-    public int getRating() {
-        return rating;
+    public int getRatings() {
+        return ratings;
     }
 
-    public void setRating(int rating) {
-        this.rating = rating;
+    public void setRatings(int ratings) {
+        this.ratings = ratings;
     }
 
-    public String getContent() {
-        return content;
+    public String getReview() {
+        return review;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setReview(String review) {
+        this.review = review;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -72,7 +72,7 @@ public class Review {
 
     @Override
     public String toString() {
-        return "Review{id=" + id + ", postId=" + postId + ", userId=" + userId +
-                ", rating=" + rating + ", createdAt=" + createdAt + '}';
+        return "Review{id=" + id + ", postId=" + postId + ", userId=" + reviewerId +
+                ", rating=" + ratings + ", createdAt=" + createdAt + '}';
     }
 }

@@ -1,6 +1,86 @@
+import config.PostgresConnectionProvider;
+import controllers.CommentController;
+import controllers.PostController;
+import controllers.UserController;
+import dao.CommentDAO;
+import dao.PostDAO;
+import dao.TagDAO;
+import dao.UserDAO;
+import dtos.request.CreatePostDTO;
+import dtos.response.CommentResponseDTO;
+import dtos.response.PostResponseDTO;
+import models.User;
+import services.CommentService;
+import services.PostService;
+import services.UserService;
+
+import java.util.List;
+
+
 public class Main {
 
     public static void main(String[] args) {
         System.out.println("Welcome to Blogging Platform!!!");
+
+        PostgresConnectionProvider connectionProvider = new PostgresConnectionProvider();
+        UserDAO userDAO = new UserDAO(connectionProvider);
+
+        PostDAO postDAO = new PostDAO(connectionProvider);
+        TagDAO tagDAO = new TagDAO(connectionProvider);
+        CommentDAO commentDAO = new CommentDAO(connectionProvider);
+
+        UserService userService = new UserService(userDAO);
+
+
+        UserController userController = new UserController(userService);
+        userController.registerUser();
+        User user = userController.signInUser();
+
+        PostService postService = new PostService(user, postDAO, tagDAO);
+        CommentService commentService = new CommentService(user, commentDAO);
+
+
+        PostController postController = new PostController(postService);
+        CommentController commentController = new CommentController(commentService);
+
+
+        int i = 3;
+        while (i > 0) {
+            userController.registerUser();
+            userController.signInUser();
+            postController.createPost(new CreatePostDTO());
+            List<PostResponseDTO> posts = postController.getAllPosts();
+            postController.getPostById(1);
+            postController.updatePost(3);
+            postController.deletePost(posts.stream()
+                    .mapToInt(PostResponseDTO::getPostId)
+                    .max()
+                    .orElse(0));
+
+            commentController.addCommentToPost();
+            List<CommentResponseDTO> comments = commentController.getAllCommentsByPostId(1);
+            commentController.getCommentById(1);
+            commentController.deleteComment(comments.stream()
+                    .mapToInt(CommentResponseDTO::getCommentId)
+                    .max()
+                    .orElse(0));
+
+            i--;
+        }
+
+
+        /*postService.getPostById(1);
+        postService.getPostById(3);
+        postService.getPostById(999);
+        postService.getPostById(2);
+        postService.getPostById(222);
+
+        postService.updatePost(1);
+        postService.updatePost(3);
+
+
+        postService.deletePost(1);
+        postService.deletePost(4);*/
+
     }
 }

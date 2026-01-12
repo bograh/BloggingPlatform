@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS posts
     body       TEXT         NOT NULL,
     author_id  INT          NOT NULL,
     posted_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP,
+    updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_author FOREIGN KEY (author_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS post_tags
 CREATE TABLE IF NOT EXISTS comments
 (
     id           SERIAL PRIMARY KEY,
-    body         TEXT      NOT NULL,
+    content      TEXT      NOT NULL,
     author_id    INT       NOT NULL,
     post_id      INT       NOT NULL,
     commented_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

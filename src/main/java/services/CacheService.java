@@ -1,4 +1,5 @@
 package services;
 
-public class CacheService {
+public class CacheService<K, V> {
+
 }

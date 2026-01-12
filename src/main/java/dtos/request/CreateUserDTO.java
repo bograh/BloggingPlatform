@@ -1,17 +1,17 @@
-package dtos;
+package dtos.request;
 
-public class UserResponseDTO {
+public class CreateUserDTO {
     private String username;
     private String email;
-    private String createdAt;
+    private String password;
 
-    public UserResponseDTO() {
+    public CreateUserDTO() {
     }
 
-    public UserResponseDTO(String username, String email, String createdAt) {
+    public CreateUserDTO(String username, String email, String password) {
         this.username = username;
         this.email = email;
-        this.createdAt = createdAt;
+        this.password = password;
     }
 
     public String getUsername() {
@@ -30,11 +30,11 @@ public class UserResponseDTO {
         this.email = email;
     }
 
-    public String getCreatedAt() {
-        return createdAt;
+    public String getPassword() {
+        return password;
     }
 
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
