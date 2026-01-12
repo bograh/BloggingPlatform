@@ -136,53 +136,6 @@ public class PostServiceTest {
         assertTrue(response.toLowerCase().contains("forbidden"));
     }
 
-    private void dropTables(Statement stmt) throws Exception {
-        stmt.execute("DROP TABLE IF EXISTS post_tags");
-        stmt.execute("DROP TABLE IF EXISTS posts");
-        stmt.execute("DROP TABLE IF EXISTS tags");
-        stmt.execute("DROP TABLE IF EXISTS users");
-    }
-
-    private void createSchema(Statement stmt) throws Exception {
-        stmt.execute("""
-                    CREATE TABLE users (
-                        id INT PRIMARY KEY AUTO_INCREMENT,
-                        username VARCHAR(255) NOT NULL,
-                        email VARCHAR(255) NOT NULL,
-                        password VARCHAR(255) NOT NULL,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    )
-                """);
-
-        stmt.execute("""
-                    CREATE TABLE tags (
-                        id INT PRIMARY KEY AUTO_INCREMENT,
-                        name VARCHAR(255) NOT NULL UNIQUE
-                    )
-                """);
-
-        stmt.execute("""
-                    CREATE TABLE posts (
-                        id INT PRIMARY KEY AUTO_INCREMENT,
-                        title VARCHAR(255) NOT NULL,
-                        body TEXT NOT NULL,
-                        author_id INT NOT NULL,
-                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        FOREIGN KEY (author_id) REFERENCES users(id)
-                    )
-                """);
-
-        stmt.execute("""
-                    CREATE TABLE post_tags (
-                        post_id INT NOT NULL,
-                        tag_id INT NOT NULL,
-                        PRIMARY KEY (post_id, tag_id),
-                        CONSTRAINT fk_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-                        CONSTRAINT fk_tag FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
-                    )
-                """);
-    }
-
     private void seedData(Statement stmt) throws Exception {
         stmt.execute("""
                     INSERT INTO users (id, username, email, password)
