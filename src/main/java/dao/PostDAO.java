@@ -171,13 +171,13 @@ public class PostDAO {
                 JOIN users u ON u.id = p.author_id
                 JOIN post_tags pt ON p.id = pt.post_id
                 JOIN tags t ON pt.tag_id = t.id
-                WHERE LOWER(t.name) = LOWER(?)
+                WHERE t.name ILIKE ?
                 ORDER BY p.posted_at DESC
                 """;
 
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, tagName);
+            stmt.setString(1, "%" + tagName + "%");
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
