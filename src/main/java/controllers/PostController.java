@@ -68,7 +68,7 @@ public class PostController {
 
     public List<PostResponseDTO> searchPostsByAuthor(String authorUsername) {
         Instant start = Instant.now();
-        List<PostResponseDTO> posts = postService.searchPosts(authorUsername);
+        List<PostResponseDTO> posts = postService.searchPostsByAuthor(authorUsername);
         QueryTimingLogger.log("searchPostsByAuthor", start, Instant.now());
         return posts;
     }

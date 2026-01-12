@@ -135,6 +135,10 @@ public class PostService {
     }
 
     public List<PostResponseDTO> searchPosts(String query) {
+        if (query == null || query.isBlank()) {
+            return new ArrayList<>();
+        }
+
         try {
             return postDAO.searchPosts(query);
         } catch (SQLException e) {
@@ -147,6 +151,10 @@ public class PostService {
     }
 
     public List<PostResponseDTO> searchPostsByTag(String tagName) {
+        if (tagName == null || tagName.isBlank()) {
+            return new ArrayList<>();
+        }
+
         String cacheKey = "search_tag_" + tagName.toLowerCase();
         Optional<List<PostResponseDTO>> cachedResults = postsListCache.get(cacheKey);
         if (cachedResults.isPresent()) {
@@ -168,6 +176,10 @@ public class PostService {
     }
 
     public List<PostResponseDTO> searchPostsByAuthor(String authorUsername) {
+        if (authorUsername == null || authorUsername.isBlank()) {
+            return new ArrayList<>();
+        }
+        
         String cacheKey = "search_author_" + authorUsername.toLowerCase();
         Optional<List<PostResponseDTO>> cachedResults = postsListCache.get(cacheKey);
         if (cachedResults.isPresent()) {
