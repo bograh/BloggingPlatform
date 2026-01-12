@@ -1,15 +1,13 @@
 package services;
 
-import dao.CommentDAO;
+import dao.CommentMongoDAO;
 import dtos.request.CreateCommentDTO;
-import dtos.response.CommentResponseDTO;
 import exceptions.CommentNotFoundException;
 import exceptions.ForbiddenException;
-import exceptions.PostNotFoundException;
 import models.Comment;
+import models.CommentDocument;
 import models.User;
 
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,14 +16,14 @@ import java.util.Optional;
 public class CommentService {
 
     private final User user;
-    private final CommentDAO commentDAO;
 
-    private final CacheService<Integer, CommentResponseDTO> commentCache = new CacheService<>(300_000);
-    private final CacheService<String, List<CommentResponseDTO>> commentsListCache = new CacheService<>(300_000);
+    private final CacheService<String, CommentDocument> commentCache = new CacheService<>(300_000);
+    private final CacheService<String, List<CommentDocument>> commentsListCache = new CacheService<>(300_000);
+    private final CommentMongoDAO commentMongoDAO;
 
-    public CommentService(User user, CommentDAO commentDAO) {
+    public CommentService(User user, CommentMongoDAO commentMongoDAO) {
         this.user = user;
-        this.commentDAO = commentDAO;
+        this.commentMongoDAO = commentMongoDAO;
     }
 
     public String addCommentToPost(CreateCommentDTO newComment) {
@@ -38,21 +36,21 @@ public class CommentService {
         );
 
         try {
-            commentDAO.addComment(comment);
+            commentMongoDAO.createComment(comment, user.getUsername());
 
             commentsListCache.invalidate("post_" + newComment.getPostId());
 
             return "Comment added to post successfully!!";
-        } catch (SQLException e) {
+        } catch (Exception e) {
             System.out.printf("Error occurred while creating comment: %s\n", e.getMessage());
         }
         return "An error occurred while creating comment";
     }
 
-    public List<CommentResponseDTO> getAllCommentsByPostId(int postId) {
+    public List<CommentDocument> getAllCommentsByPostId(int postId) {
         String cacheKey = "post_" + postId;
 
-        Optional<List<CommentResponseDTO>> cachedComments = commentsListCache.get(cacheKey);
+        Optional<List<CommentDocument>> cachedComments = commentsListCache.get(cacheKey);
         if (cachedComments.isPresent()) {
             System.out.println("[CACHE HIT] Retrieved comments for post " + postId + " from cache");
             return cachedComments.get();
@@ -60,19 +58,17 @@ public class CommentService {
 
         System.out.println("[CACHE MISS] Fetching comments for post " + postId + " from database");
         try {
-            List<CommentResponseDTO> comments = commentDAO.getAllCommentsByPostId(postId);
+            List<CommentDocument> comments = commentMongoDAO.getAllCommentsByPostId(postId);
             commentsListCache.set(cacheKey, comments);
             return comments;
-        } catch (PostNotFoundException e) {
-            System.out.println(e.getMessage());
-        } catch (SQLException e) {
+        } catch (Exception e) {
             System.out.printf("An error occurred while retrieving comment for post with id: %d\n%s\n", postId, e.getMessage());
         }
         return new ArrayList<>();
     }
 
-    public CommentResponseDTO getCommentById(int commentId) {
-        Optional<CommentResponseDTO> cachedComment = commentCache.get(commentId);
+    public CommentDocument getCommentById(String commentId) {
+        Optional<CommentDocument> cachedComment = commentCache.get(commentId);
         if (cachedComment.isPresent()) {
             System.out.println("[CACHE HIT] Retrieved comment " + commentId + " from cache");
             return cachedComment.get();
@@ -80,32 +76,34 @@ public class CommentService {
 
         System.out.println("[CACHE MISS] Fetching comment " + commentId + " from database");
         try {
-            CommentResponseDTO comment = commentDAO.getCommentById(commentId);
+            CommentDocument comment = commentMongoDAO.getCommentById(commentId);
             commentCache.set(commentId, comment);
             return comment;
         } catch (CommentNotFoundException e) {
             System.out.println(e.getMessage());
-        } catch (SQLException e) {
-            System.out.printf("An error occurred while retrieving comment with id: %d\n%s\n", commentId, e.getMessage());
+        } catch (Exception e) {
+            System.out.printf("An error occurred while retrieving comment with id: %s\n%s\n", commentId, e.getMessage());
         }
         return null;
     }
 
-    public String deleteComment(int commentId) {
+    public String deleteComment(String commentId) {
         try {
-            commentDAO.deleteComment(commentId, user.getId());
+            boolean deleteSuccessful = commentMongoDAO.deleteComment(commentId, user.getId());
+            if (deleteSuccessful) {
+                commentCache.invalidate(commentId);
+                commentsListCache.clear();
 
-            commentCache.invalidate(commentId);
-            commentsListCache.clear();
-
-            return String.format("Comment with id: %d deleted successfully!", commentId);
+                return String.format("Comment with id: %s deleted successfully!", commentId);
+            }
+            return String.format("Comment with id: %s deleted unsuccessful!", commentId);
         } catch (ForbiddenException e) {
             System.out.println(e.getMessage());
             return e.getMessage();
-        } catch (SQLException e) {
-            System.out.printf("An error occurred while deleting comment with id: %d\n%s\n", commentId, e.getMessage());
+        } catch (Exception e) {
+            System.out.printf("An error occurred while deleting comment with id: %s\n%s\n", commentId, e.getMessage());
         }
-        return String.format("An error occurred while deleting comment with id: %d", commentId);
+        return String.format("An error occurred while deleting comment with id: %s", commentId);
     }
 
     public String getCacheStatistics() {

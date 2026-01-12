@@ -1,18 +1,18 @@
+import config.MongoConnection;
 import config.PostgresConnectionProvider;
 import controllers.CommentController;
 import controllers.PostController;
 import controllers.UserController;
-import dao.CommentDAO;
+import dao.CommentMongoDAO;
 import dao.PostDAO;
 import dao.TagDAO;
 import dao.UserDAO;
-import dtos.request.CreatePostDTO;
-import dtos.response.CommentResponseDTO;
-import dtos.response.PostResponseDTO;
+import models.CommentDocument;
 import models.User;
 import services.CommentService;
 import services.PostService;
 import services.UserService;
+import utils.Constants;
 
 import java.util.List;
 
@@ -27,7 +27,13 @@ public class Main {
 
         PostDAO postDAO = new PostDAO(connectionProvider);
         TagDAO tagDAO = new TagDAO(connectionProvider);
-        CommentDAO commentDAO = new CommentDAO(connectionProvider);
+        CommentMongoDAO commentMongoDAO = new CommentMongoDAO(
+                MongoConnection.getDatabase(),
+                Constants.CommentsMongoCollection
+        );
+
+        System.out.println(commentMongoDAO.getAllCommentsByPostId(1));
+        System.out.println();
 
         UserService userService = new UserService(userDAO);
 
@@ -36,14 +42,21 @@ public class Main {
         User user = userController.signInUser();
 
         PostService postService = new PostService(user, postDAO, tagDAO);
-        CommentService commentService = new CommentService(user, commentDAO);
+        CommentService commentService = new CommentService(user, commentMongoDAO);
 
 
         PostController postController = new PostController(postService);
         CommentController commentController = new CommentController(commentService);
 
+        List<CommentDocument> comments = commentController.getAllCommentsByPostId(1);
+        System.out.println(comments);
 
-        int i = 3;
+        System.out.println(commentController.getAllCommentsByPostId(1));
+        System.out.println(commentController.getAllCommentsByPostId(1));
+        System.out.println(commentController.getAllCommentsByPostId(1));
+
+
+        /*int i = 3;
         while (i > 0) {
             userController.registerUser();
             userController.signInUser();
@@ -57,15 +70,11 @@ public class Main {
                     .orElse(0));
 
             commentController.addCommentToPost();
-            List<CommentResponseDTO> comments = commentController.getAllCommentsByPostId(1);
-            commentController.getCommentById(1);
-            commentController.deleteComment(comments.stream()
-                    .mapToInt(CommentResponseDTO::getCommentId)
-                    .max()
-                    .orElse(0));
+            List<CommentDocument> comments = commentController.getAllCommentsByPostId(1);
+            System.out.println(comments);
 
             i--;
-        }
+        }*/
 
 
         /*postService.getPostById(1);

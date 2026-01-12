@@ -1,7 +1,7 @@
 package controllers;
 
 import dtos.request.CreateCommentDTO;
-import dtos.response.CommentResponseDTO;
+import models.CommentDocument;
 import services.CommentService;
 import utils.QueryTimingLogger;
 
@@ -27,21 +27,21 @@ public class CommentController {
         return response;
     }
 
-    public List<CommentResponseDTO> getAllCommentsByPostId(int postId) {
+    public List<CommentDocument> getAllCommentsByPostId(int postId) {
         Instant start = Instant.now();
-        List<CommentResponseDTO> comments = commentService.getAllCommentsByPostId(postId);
+        List<CommentDocument> comments = commentService.getAllCommentsByPostId(postId);
         QueryTimingLogger.log("getAllCommentsForPost", start, Instant.now());
         return comments;
     }
 
-    public CommentResponseDTO getCommentById(int commentId) {
+    public CommentDocument getCommentById(String commentId) {
         Instant start = Instant.now();
-        CommentResponseDTO comment = commentService.getCommentById(commentId);
+        CommentDocument comment = commentService.getCommentById(commentId);
         QueryTimingLogger.log("getCommentById", start, Instant.now());
         return comment;
     }
 
-    public String deleteComment(int commentId) {
+    public String deleteComment(String commentId) {
         Instant start = Instant.now();
         String response = commentService.deleteComment(commentId);
         QueryTimingLogger.log("deleteComment", start, Instant.now());
