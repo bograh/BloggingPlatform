@@ -27,7 +27,7 @@ public class LoginViewController {
         view.setAlignment(Pos.CENTER);
         view.setPadding(new Insets(20));
 
-        Label titleLabel = new Label("ui.BloggingApp - Smart Blogging Platform");
+        Label titleLabel = new Label("BloggingApp - Smart Blogging Platform");
         titleLabel.setFont(Font.font("System", FontWeight.BOLD, 18));
 
         TabPane tabPane = new TabPane();

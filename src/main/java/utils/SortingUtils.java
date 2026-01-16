@@ -89,7 +89,7 @@ public class SortingUtils {
      * Sort posts by date (oldest first)
      */
     public static Comparator<PostResponseDTO> byDateOldestFirst() {
-        return (p1, p2) -> p1.getLastUpdated().compareTo(p2.getLastUpdated());
+        return Comparator.comparing(PostResponseDTO::getLastUpdated);
     }
 
     /**
